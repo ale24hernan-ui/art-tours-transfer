@@ -216,3 +216,15 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Archivos de entorno y secretos que Git debe ignorar por completo.
+.env
+
+# Carpetas temporales y caché que Python genera automáticamente al ejecutarse.
+# Ignorarlas mantiene el repositorio ligero y limpio.
+__pycache__/
+*.pyc
+
+# Si en el futuro creamos un entorno virtual de Python, le decimos a Git que lo ignore.
+venv/
+env/
