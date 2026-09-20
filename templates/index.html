@@ -1,0 +1,53 @@
+<!DOCTYPE html> <!-- Declara el tipo de documento como HTML5, asegurando que los navegadores modernos lo interpreten con los últimos estándares. -->
+<html lang="es"> <!-- Abre la etiqueta raíz del documento y define el español como idioma principal para optimizar el posicionamiento en buscadores (SEO) en México. -->
+<head> <!-- Contenedor de metadatos; aquí va la configuración técnica que el usuario no ve, pero que el navegador necesita para renderizar la página. -->
+    <meta charset="UTF-8"> <!-- Establece la codificación UTF-8 para garantizar que los acentos y caracteres especiales se muestren correctamente. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Instruye al navegador a adaptar el ancho de la página al tamaño de la pantalla del dispositivo (Responsive Design). -->
+    <title>ART-TOURS TRANSFER | Transporte Privado en Cancún</title> <!-- Define el texto que aparecerá en la pestaña del navegador y en los resultados de Google. -->
+    
+    <!-- Importamos la hoja de estilos de FontAwesome desde una red de distribución de contenido (CDN) para habilitar íconos vectoriales. -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Conectamos nuestro archivo CSS local asegurando que Flask lo encuentre en la ruta '/static/'. -->
+    <link rel="stylesheet" href="/static/styles.css"> 
+</head> <!-- Cierra la sección de metadatos. -->
+<body> <!-- Abre el cuerpo del documento; todo lo que esté aquí dentro será visible para el turista. -->
+
+    <header class="navbar"> <!-- Define la cabecera semántica de la página. -->
+        <div class="logo"> <!-- Contenedor para el logotipo de la empresa. -->
+            <strong>ART-TOURS TRANSFER</strong> <!-- Texto en negrita que actúa como logotipo provisional. -->
+        </div> <!-- Cierra el contenedor del logotipo. -->
+        <nav class="menu"> <!-- Define la sección de navegación para enlaces internos. -->
+            <a href="#servicios">Nuestros Servicios</a> <!-- Enlace ancla hacia la sección de servicios. -->
+            <a href="#flota">Nuestra Flota</a> <!-- Enlace ancla hacia la descripción del vehículo. -->
+            <a href="#contacto">Contacto</a> <!-- Enlace ancla hacia los datos de contacto. -->
+        </nav> <!-- Cierra la sección de navegación. -->
+    </header> <!-- Cierra la cabecera principal. -->
+
+    <main> <!-- Contenedor semántico principal del contenido. -->
+        <!-- Omitiré las secciones <section> hero y flota aquí para no saturarte, asumiendo que las mantienes intactas como en tu versión original. -->
+    </main> <!-- Cierra el contenido principal. -->
+
+    <footer id="contacto"> <!-- Sección para el pie de página y enlaces legales. -->
+        <div class="contacto-info"> <!-- Contenedor para los datos directos de la empresa. -->
+            <h3>Contacto Rápido</h3> <!-- Título de la sección de contacto. -->
+            <p>WhatsApp: (+52) 998 215 6446</p> <!-- Muestra el número oficial de operaciones. -->
+            <p>Email: aztec360@msn.com</p> <!-- Muestra el correo electrónico corporativo. -->
+        </div> <!-- Cierra el contenedor de datos de contacto. -->
+        <div class="copyright"> <!-- Contenedor para los derechos de autor. -->
+            <p>&copy; 2026 ART-TOURS TRANSFER. Todos los derechos reservados.</p> <!-- Declara la propiedad intelectual del sitio web. -->
+        </div> <!-- Cierra el contenedor de copyright. -->
+    </footer> <!-- Cierra el pie de página. -->
+
+    <!-- AQUÍ ES DONDE DEBE IR EL BOTÓN: Al final del cuerpo visual, antes de cerrar la página. -->
+    <!-- Creamos un enlace con la clase 'whatsapp-flotante' para estilizarlo desde nuestro archivo CSS. -->
+    <!-- El atributo 'href' usa el formato wa.me seguido del número oficial del negocio[cite: 10]. -->
+    <!-- 'target="_blank"' asegura que la aplicación de WhatsApp se abra en una pestaña nueva. -->
+    <!-- El atributo 'href' incluye ahora el parámetro '?text=' seguido del mensaje codificado para que WhatsApp lo lea correctamente. -->
+    <a href="https://wa.me/529982156446?text=Hola%20ART-TOURS%20TRANSFER,%20vengo%20de%20su%20p%C3%A1gina%20web%20y%20deseo%20cotizar%20un%20traslado." class="whatsapp-flotante" target="_blank">
+        <!-- Mantenemos el ícono de FontAwesome intacto en el interior del enlace. -->
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+</body> <!-- Cierra el cuerpo visible del documento HTML. -->
+</html> <!-- Cierra la estructura completa del documento HTML5. -->

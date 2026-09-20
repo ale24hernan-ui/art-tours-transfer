@@ -1,4 +1,11 @@
+# Framework web principal para levantar el servidor y conectar el HTML.
 Flask==3.0.0
+
+# Servidor HTTP de grado de producción requerido por la plataforma Render para mantener la página en línea.
 gunicorn==21.2.0
-psycopg2-binary==2.9.9
+
+# Adaptador de base de datos. Sin versión específica para que descargue la compatible con Python 3.13.
+psycopg2-binary
+
+# Herramienta de seguridad para leer nuestras contraseñas desde el archivo oculto .env.
 python-dotenv==1.0.0
