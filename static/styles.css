@@ -148,3 +148,117 @@ nav a:hover {
     display: flex;
     align-items: center;
 }
+/* =========================================
+   ESTILOS DEL TEXTO HERO
+   ========================================= */
+
+/* Seleccionamos el título principal (h1) que está dentro de la sección hero */
+#hero h1 {
+    /* Cambiamos el color de la fuente a blanco puro para crear contraste máximo contra el fondo oscuro */
+    color: #ffffff;
+    /* Aumentamos el tamaño de la fuente a 3 unidades relativas (aprox 48px) para que sea imponente */
+    font-size: 3rem;
+    /* Agregamos una sombra negra sutil detrás del texto para que resalte aún más sobre zonas claras de la foto */
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
+    /* Separamos el título del párrafo que le sigue agregando un margen inferior de 15 píxeles */
+    margin-bottom: 15px;
+}
+
+/* Seleccionamos el párrafo descriptivo (p) dentro del hero */
+#hero p {
+    /* Color blanco puro para coherencia visual */
+    color: #ffffff;
+    /* Tamaño de fuente intermedio, lo suficientemente grande para leerse en celulares */
+    font-size: 1.5rem;
+    /* Sombra paralela más suave para la lectura prolongada */
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+    /* Margen inferior amplio para empujar el formulario de reservas hacia abajo y respirar visualmente */
+    margin-bottom: 40px;
+}
+
+/* =========================================
+   EFECTO GLASSMORPHISM PARA EL FORMULARIO
+   ========================================= */
+
+/* Seleccionamos la caja que envuelve todo el formulario de reservación */
+.widget-reserva {
+    /* Aplicamos un fondo blanco casi transparente (15% de opacidad) simulando el vidrio */
+    background: rgba(255, 255, 255, 0.15);
+    /* La magia: Desenfoca (blur) los píxeles de la imagen de fondo que quedan detrás de esta caja */
+    backdrop-filter: blur(10px);
+    /* Suaviza los bordes para navegadores de Apple (Safari) */
+    -webkit-backdrop-filter: blur(10px);
+    /* Espacio interno amplio para que los elementos no choquen con los bordes del cristal */
+    padding: 35px 40px;
+    /* Redondeamos las esquinas de la caja de cristal para un aspecto amigable y moderno */
+    border-radius: 15px;
+    /* Agregamos un borde blanco ultra delgado y semitransparente para simular el reflejo de la luz en el cristal */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    /* Proyectamos una sombra difusa debajo de la caja para que parezca que flota sobre la arena */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    /* Limitamos el ancho máximo para que no se estire demasiado en pantallas de PC gigantes */
+    max-width: 400px;
+    /* Asegura que el widget ocupe el 100% de su contenedor hasta llegar a los 400px de límite */
+    width: 100%;
+}
+
+/* Estilizamos las etiquetas de texto (Número de Pasajeros) dentro del widget */
+.widget-reserva label {
+    /* Texto blanco para contrastar con el cristal oscuro */
+    color: #ffffff;
+    /* Fuerza a que el texto ocupe toda su propia línea, empujando el input hacia abajo */
+    display: block;
+    /* Separación inferior entre la etiqueta y el cuadro de escritura */
+    margin-bottom: 10px;
+    /* Texto en negritas para mayor claridad funcional */
+    font-weight: bold;
+    /* Tamaño de texto estándar */
+    font-size: 1.1rem;
+}
+
+/* Estilizamos el cuadro donde el usuario escribe el número */
+.widget-reserva input {
+    /* Ancho completo para maximizar el área táctil en teléfonos móviles */
+    width: 100%;
+    /* Espaciado interno cómodo para escribir */
+    padding: 12px;
+    /* Margen inferior para separarlo del botón de envío */
+    margin-bottom: 20px;
+    /* Quitamos el borde negro estándar de HTML */
+    border: none;
+    /* Bordes ligeramente redondeados a juego con la caja principal */
+    border-radius: 8px;
+    /* Aumentamos el tamaño de los números que el turista escribe */
+    font-size: 1.1rem;
+}
+
+/* Estilizamos el botón de llamado a la acción (Call to Action) */
+.widget-reserva button {
+    /* Ancho al 100% para ser fácilmente clickeable */
+    width: 100%;
+    /* Aplicamos tu color oficial Azul Cian para resaltar la acción principal */
+    background-color: #00bfff;
+    /* Color de texto del botón en blanco */
+    color: #ffffff;
+    /* Espaciado interno para que sea un botón grueso y prominente */
+    padding: 14px;
+    /* Quitamos los bordes feos por defecto */
+    border: none;
+    /* Esquinas redondeadas congruentes con el diseño general */
+    border-radius: 8px;
+    /* Texto en negritas e incrementado para detonar urgencia y claridad */
+    font-weight: bold;
+    font-size: 1.1rem;
+    /* Cambia el cursor por una manita (pointer) indicando que es un elemento interactivo */
+    cursor: pointer;
+    /* Prepara una animación suave de 0.3 segundos para cuando el mouse pase por encima */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+/* Efecto al pasar el cursor sobre el botón (Hover) */
+.widget-reserva button:hover {
+    /* Oscurecemos ligeramente el azul cian para dar retroalimentación visual al usuario */
+    background-color: #0099cc;
+    /* Elevamos visualmente el botón 2 píxeles hacia arriba para dar sensación táctil */
+    transform: translateY(-2px);
+}
