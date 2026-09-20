@@ -1,56 +1,75 @@
-<!DOCTYPE html> <!-- Declara el tipo de documento como HTML5, asegurando que los navegadores modernos lo interpreten con los últimos estándares. -->
-<html lang="es"> <!-- Abre la etiqueta raíz del documento y define el español como idioma principal para optimizar el posicionamiento en buscadores (SEO) en México. -->
-<head> <!-- Contenedor de metadatos; aquí va la configuración técnica que el usuario no ve, pero que el navegador necesita para renderizar la página. -->
-    <meta charset="UTF-8"> <!-- Establece la codificación UTF-8 para garantizar que los acentos y caracteres especiales se muestren correctamente. -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Instruye al navegador a adaptar el ancho de la página al tamaño de la pantalla del dispositivo (Responsive Design). -->
-    <title>ART-TOURS TRANSFER | Transporte Privado en Cancún</title> <!-- Define el texto que aparecerá en la pestaña del navegador y en los resultados de Google. -->
+<!DOCTYPE html> <!-- Declara que este documento usa el estándar HTML5 moderno. -->
+<html lang="es"> <!-- Define el idioma español para mejorar el posicionamiento SEO en búsquedas en Cancún. -->
+<head> <!-- Abre la cabecera: contiene datos invisibles para el usuario pero vitales para el navegador. -->
+    <meta charset="UTF-8"> <!-- Permite usar acentos y caracteres latinos sin que el texto se deforme. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Instruye al navegador para adaptar la web a pantallas de celulares (Responsive). -->
+    <title>ART-TOURS TRANSFER | Transporte Privado en Cancún</title> <!-- El título que aparece en la pestaña del navegador. -->
     
-    <!-- Importamos la hoja de estilos de FontAwesome desde una red de distribución de contenido (CDN) para habilitar íconos vectoriales. -->
+    <!-- Importamos los íconos vectoriales de FontAwesome desde un servidor externo (CDN). -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Conectamos nuestro archivo CSS local asegurando que Flask lo encuentre en la ruta '/static/'. -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"> 
-</head> <!-- Cierra la sección de metadatos. -->
-<body> <!-- Abre el cuerpo del documento; todo lo que esté aquí dentro será visible para el turista. -->
+    <!-- Conectamos el archivo CSS usando Jinja2 para que Flask construya la ruta dinámica exacta. -->
+    <!-- Mantenemos el '?v=1.1' para forzar la actualización de la memoria caché del navegador (Cache Busting). -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=1.1">
+</head> <!-- Cierra la cabecera. -->
 
-    <header class="navbar"> <!-- Define la cabecera semántica de la página. -->
+<body> <!-- Abre el cuerpo visible: todo lo que está aquí se renderizará en la pantalla del turista. -->
+
+    <header class="navbar"> <!-- Define el bloque superior de la barra de navegación negra. -->
         
-        <!-- Contenedor del logotipo oficial: Reemplazamos el texto plano por la imagen con enlace a la raíz -->
+        <!-- Envolvemos la imagen en un enlace ('a') que apunta a la raíz ('/'), funcionando como un botón de "Inicio". -->
         <a href="/" class="logo-container">
-            <!-- Vinculamos la ruta estática en formato PNG asegurando que Flask la sirva correctamente -->
+            <!-- Insertamos el logotipo oficial PNG llamándolo desde la subcarpeta static/images/. -->
             <img src="{{ url_for('static', filename='images/logo-transfers.png') }}" alt="Logotipo ART-TOURS TRANSFER" class="logo-img">
-        </a>
+        </a> <!-- Cierra el enlace del logotipo. -->
 
-        <nav class="menu"> <!-- Define la sección de navegación para enlaces internos. -->
-            <a href="#servicios">Nuestros Servicios</a> <!-- Enlace ancla hacia la sección de servicios. -->
-            <a href="#flota">Nuestra Flota</a> <!-- Enlace ancla hacia la descripción del vehículo. -->
-            <a href="#contacto">Contacto</a> <!-- Enlace ancla hacia los datos de contacto. -->
-        </nav> <!-- Cierra la sección de navegación. -->
-    </header> <!-- Cierra la cabecera principal. -->
-    <main> <!-- Contenedor semántico principal del contenido. -->
-        <!-- Omitiré las secciones <section> hero y flota aquí para no saturarte, asumiendo que las mantienes intactas como en tu versión original. -->
-    </main> <!-- Cierra el contenido principal. -->
+        <nav> <!-- Abre el contenedor para los botones del menú de navegación a la derecha. -->
+            <a href="#servicios">Nuestros Servicios</a> <!-- Enlace ancla hacia la futura sección de servicios. -->
+            <a href="#flota">Nuestra Flota</a> <!-- Enlace ancla hacia la futura galería de vehículos. -->
+            <a href="#contacto">Contacto</a> <!-- Enlace ancla hacia la sección inferior de datos de contacto. -->
+        </nav> <!-- Cierra el contenedor de navegación. -->
 
-    <footer id="contacto"> <!-- Sección para el pie de página y enlaces legales. -->
-        <div class="contacto-info"> <!-- Contenedor para los datos directos de la empresa. -->
-            <h3>Contacto Rápido</h3> <!-- Título de la sección de contacto. -->
-            <p>WhatsApp: (+52) 998 215 6446</p> <!-- Muestra el número oficial de operaciones. -->
-            <p>Email: aztec360@msn.com</p> <!-- Muestra el correo electrónico corporativo. -->
-        </div> <!-- Cierra el contenedor de datos de contacto. -->
-        <div class="copyright"> <!-- Contenedor para los derechos de autor. -->
-            <p>&copy; 2026 ART-TOURS TRANSFER. Todos los derechos reservados.</p> <!-- Declara la propiedad intelectual del sitio web. -->
-        </div> <!-- Cierra el contenedor de copyright. -->
-    </footer> <!-- Cierra el pie de página. -->
+    </header> <!-- Cierra la barra superior. -->
 
-    <!-- AQUÍ ES DONDE DEBE IR EL BOTÓN: Al final del cuerpo visual, antes de cerrar la página. -->
-    <!-- Creamos un enlace con la clase 'whatsapp-flotante' para estilizarlo desde nuestro archivo CSS. -->
-    <!-- El atributo 'href' usa el formato wa.me seguido del número oficial del negocio[cite: 10]. -->
-    <!-- 'target="_blank"' asegura que la aplicación de WhatsApp se abra en una pestaña nueva. -->
-    <!-- El atributo 'href' incluye ahora el parámetro '?text=' seguido del mensaje codificado para que WhatsApp lo lea correctamente. -->
-    <a href="https://wa.me/529982156446?text=Hola%20ART-TOURS%20TRANSFER,%20vengo%20de%20su%20p%C3%A1gina%20web%20y%20deseo%20cotizar%20un%20traslado." class="whatsapp-flotante" target="_blank">
-        <!-- Mantenemos el ícono de FontAwesome intacto en el interior del enlace. -->
-        <i class="fa-brands fa-whatsapp"></i>
-    </a>
+    <!-- ========================================================================= -->
+    <!-- LA CLAVE DE LA CORRECCIÓN: SECCIÓN HERO -->
+    <!-- Este bloque debe envolver todo el contenido inicial para que CSS aplique la imagen 'playa-1-fondolargo.jpg'. -->
+    <!-- ========================================================================= -->
+    <section id="hero"> 
 
-</body> <!-- Cierra el cuerpo visible del documento HTML. -->
-</html> <!-- Cierra la estructura completa del documento HTML5. -->
+        <!-- Titular principal para captar la atención del turista inmediatamente. -->
+        <h1>Reserva tu Traslado en Cancún</h1>
+        
+        <!-- Subtítulo que refuerza la propuesta de valor comercial. -->
+        <p>Viaje seguro, privado y sin demoras hacia tu hotel.</p>
+
+        <!-- Contenedor del widget de cotización rápida. -->
+        <div class="widget-reserva">
+            <!-- Formulario de captura; envía datos de forma segura (POST) a la ruta '/reservar' que procesará Flask. -->
+            <form action="/reservar" method="POST">
+                
+                <label for="pasajeros">Número de Pasajeros:</label> <!-- Etiqueta descriptiva para el campo numérico. -->
+                
+                <!-- Input de pasajeros con restricción dura de 1 a 8, respetando la capacidad real de tu Van. -->
+                <input type="number" id="pasajeros" name="pasajeros" min="1" max="8" required>
+                
+                <button type="submit">Verificar Disponibilidad</button> <!-- Botón que acciona el envío del formulario. -->
+                
+            </form> <!-- Cierra el formulario de reservación. -->
+        </div> <!-- Cierra el widget. -->
+
+    </section> <!-- Cierra la sección Hero. Esto detiene la imagen de fondo y permite que la página continúe bajando. -->
+
+    <!-- Abre la sección final informativa al fondo de la página. -->
+    <section id="contacto">
+        <h3>Contacto Directo</h3> <!-- Título de la sección. -->
+        <!-- Mostramos el WhatsApp corporativo oficial establecido en tus reglas de negocio. -->
+        <p>WhatsApp: (+52) 998 215 6446</p>
+        <!-- Mostramos el correo electrónico corporativo. -->
+        <p>Email: aztec360@msn.com</p>
+        <!-- Texto legal que otorga autoridad y profesionalismo a la marca. -->
+        <p>© 2026 ART-TOURS TRANSFER. Todos los derechos reservados.</p>
+    </section> <!-- Cierra la sección de contacto. -->
+
+</body> <!-- Cierra el cuerpo visible. -->
+</html> <!-- Fin absoluto del documento HTML. -->
