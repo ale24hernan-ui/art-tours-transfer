@@ -91,11 +91,8 @@ nav a:hover {
 
 /* Seleccionamos la sección principal de bienvenida */
 #hero {
-    /* Vinculamos el archivo exacto de la playa que renombraste. */
-    /* no-repeat: evita que la foto se multiplique como mosaico. */
-    /* center center: centra la foto vertical y horizontalmente. */
-    /* /cover: fuerza a la imagen a cubrir todo el espacio disponible, recortando bordes si es necesario. */
-    background: url('images/playa-1-fondolargo.jpg') no-repeat center center/cover;
+    /* Agregamos la barra diagonal al inicio (/static/images/...) para que el servidor local y Render ubiquen la foto sin error */
+    background: url('/static/images/playa-1-fondolargo.jpg') no-repeat center center/cover;
     /* Aplicamos un filtro oscuro (negro al 60% de opacidad) para que las letras blancas resalten */
     background-color: rgba(0, 0, 0, 0.6); 
     /* Mezclamos el color oscuro con la fotografía de fondo */
