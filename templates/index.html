@@ -14,16 +14,19 @@
 <body> <!-- Abre el cuerpo del documento; todo lo que esté aquí dentro será visible para el turista. -->
 
     <header class="navbar"> <!-- Define la cabecera semántica de la página. -->
-        <div class="logo"> <!-- Contenedor para el logotipo de la empresa. -->
-            <strong>ART-TOURS TRANSFER</strong> <!-- Texto en negrita que actúa como logotipo provisional. -->
-        </div> <!-- Cierra el contenedor del logotipo. -->
+        
+        <!-- Contenedor del logotipo oficial: Reemplazamos el texto plano por la imagen con enlace a la raíz -->
+        <a href="/" class="logo-container">
+            <!-- Vinculamos la ruta estática en formato PNG asegurando que Flask la sirva correctamente -->
+            <img src="/static/images/logo-transfer.png" alt="Logotipo ART-TOURS TRANSFER" class="logo-img">
+        </a>
+
         <nav class="menu"> <!-- Define la sección de navegación para enlaces internos. -->
             <a href="#servicios">Nuestros Servicios</a> <!-- Enlace ancla hacia la sección de servicios. -->
             <a href="#flota">Nuestra Flota</a> <!-- Enlace ancla hacia la descripción del vehículo. -->
             <a href="#contacto">Contacto</a> <!-- Enlace ancla hacia los datos de contacto. -->
         </nav> <!-- Cierra la sección de navegación. -->
     </header> <!-- Cierra la cabecera principal. -->
-
     <main> <!-- Contenedor semántico principal del contenido. -->
         <!-- Omitiré las secciones <section> hero y flota aquí para no saturarte, asumiendo que las mantienes intactas como en tu versión original. -->
     </main> <!-- Cierra el contenido principal. -->

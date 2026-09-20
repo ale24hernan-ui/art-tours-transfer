@@ -1,0 +1,159 @@
+/* =========================================
+   1. RESET BÁSICO Y VARIABLES DE MARCA
+   ========================================= */
+
+/* El asterisco (*) selecciona todos los elementos de la página web. */
+* {
+    /* Quitamos el margen que los navegadores ponen por defecto para tener control total. */
+    margin: 0;
+    /* Quitamos el relleno interno automático. */
+    padding: 0;
+    /* Evita que los bordes aumenten el tamaño total de los elementos. */
+    box-sizing: border-box;
+    /* Definimos una tipografía limpia, moderna y fácil de leer en móviles. */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* =========================================
+   2. BARRA DE NAVEGACIÓN (HEADER)
+   ========================================= */
+
+/* Seleccionamos el contenedor principal del menú. */
+header {
+    /* Usamos el color Negro de la identidad visual de la marca para dar elegancia. */
+    background-color: #000000; 
+    /* Aplicamos Flexbox para alinear el logotipo a la izquierda y el menú a la derecha. */
+    display: flex;
+    /* Separa los elementos empujándolos a los extremos. */
+    justify-content: space-between;
+    /* Centra los elementos verticalmente dentro de la barra negra. */
+    align-items: center;
+    /* Relleno interno: 20px arriba/abajo, 50px a los lados. */
+    padding: 20px 50px;
+    /* Fija la barra en la parte superior para que siempre esté visible al bajar. */
+    position: fixed;
+    /* Asegura que la barra ocupe el 100% del ancho de la pantalla. */
+    width: 100%;
+    /* Z-index alto asegura que la barra siempre esté por encima de las imágenes. */
+    z-index: 1000;
+}
+
+/* Estilo para el texto "ART-TOURS TRANSFER" que hace de logotipo. */
+header strong {
+    /* Color blanco para contrastar con el fondo negro. */
+    color: #ffffff;
+    /* Tamaño de letra grande. */
+    font-size: 24px;
+    /* Espacio entre letras para un aspecto más premium. */
+    letter-spacing: 2px;
+}
+
+/* Estilo para los enlaces de navegación (Nuestros Servicios, Nuestra Flota, Contacto). */
+nav a {
+    /* Color blanco para el texto. */
+    color: #ffffff;
+    /* Quita el subrayado azul feo que traen los enlaces por defecto. */
+    text-decoration: none;
+    /* Separa cada botón del menú por 20px. */
+    margin-left: 20px;
+    /* Tamaño de letra estándar. */
+    font-size: 16px;
+    /* Hace que el cambio de color al pasar el mouse sea suave (0.3 segundos). */
+    transition: color 0.3s ease;
+}
+
+/* Efecto al pasar el mouse (hover) sobre los enlaces del menú. */
+nav a:hover {
+    /* Cambia al color Azul Cian/Eléctrico de la identidad de la marca. */
+    color: #00bfff; 
+}
+
+/* =========================================
+   3. SECCIÓN PRINCIPAL (HERO) Y FONDO
+   ========================================= */
+/* =========================================
+   CONTROL DEL LOGOTIPO OFICIAL
+   ========================================= */
+
+/* Seleccionamos la imagen usando la clase que le asignamos en el HTML */
+.logo-img {
+    /* Limitamos la altura a 70px para que encaje dentro del header negro sin desbordarse */
+    height: 70px;
+    /* width: auto mantiene la proporción original del logo para que no se vea estirado ni aplastado */
+    width: auto;
+    /* Agregamos una transición de 0.3 segundos para futuros efectos al pasar el cursor */
+    transition: transform 0.3s ease;
+}
+
+/* =========================================
+   ACTUALIZACIÓN DE LA SECCIÓN HERO (IMAGEN DE FONDO)
+   ========================================= */
+
+/* Seleccionamos la sección principal de bienvenida */
+#hero {
+    /* Vinculamos el archivo exacto de la playa que renombraste. */
+    /* no-repeat: evita que la foto se multiplique como mosaico. */
+    /* center center: centra la foto vertical y horizontalmente. */
+    /* /cover: fuerza a la imagen a cubrir todo el espacio disponible, recortando bordes si es necesario. */
+    background: url('images/playa-1-fondolargo.jpg') no-repeat center center/cover;
+    /* Aplicamos un filtro oscuro (negro al 60% de opacidad) para que las letras blancas resalten */
+    background-color: rgba(0, 0, 0, 0.6); 
+    /* Mezclamos el color oscuro con la fotografía de fondo */
+    background-blend-mode: overlay;
+    /* Asegura que esta sección ocupe el 100% de la altura de la pantalla del dispositivo (Viewport Height) */
+    min-height: 100vh;
+    /* Usamos Flexbox para centrar el contenido interno */
+    display: flex;
+    /* Apilamos los elementos de texto uno debajo del otro de forma vertical */
+    flex-direction: column;
+    /* Centramos el contenido en el eje principal (vertical en este caso) */
+    justify-content: center;
+    /* Centramos el contenido en el eje transversal (horizontal en este caso) */
+    align-items: center;
+    /* Centramos la alineación del texto en sí mismo */
+    text-align: center;
+}
+
+/* =========================================
+   4. ESTILOS DE CONTACTO Y PIE DE PÁGINA
+   ========================================= */
+
+/* Sección de contacto rápido */
+#contacto {
+    /* Fondo blanco limpio. */
+    background-color: #ffffff;
+    /* Relleno para separar el texto de los bordes. */
+    padding: 50px 20px;
+    /* Centra el texto. */
+    text-align: center;
+}
+
+/* Títulos dentro de la sección de contacto */
+#contacto h3 {
+    /* Color negro. */
+    color: #000000;
+    /* Margen inferior para separarlo del número de WhatsApp. */
+    margin-bottom: 20px;
+}
+
+/* Párrafos de contacto (WhatsApp y Correo) */
+#contacto p {
+    /* Color gris oscuro para jerarquía secundaria. */
+    color: #333333;
+    /* Interlineado cómodo para la lectura. */
+    line-height: 1.6;
+    /* Tamaño de fuente legible. */
+    font-size: 18px;
+}
+/* =========================================
+   5. CONTENEDOR DEL LOGOTIPO EN EL HEADER
+   ========================================= */
+
+/* Seleccionamos el enlace que envuelve el logo */
+.logo-container {
+    /* Quitamos cualquier subrayado o efecto de enlace heredado */
+    text-decoration: none;
+    /* Usamos Flexbox interno para alinear la imagen perfectamente al centro vertical */
+    display: flex;
+    align-items: center;
+}
