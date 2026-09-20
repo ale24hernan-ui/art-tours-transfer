@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Conectamos nuestro archivo CSS local asegurando que Flask lo encuentre en la ruta '/static/'. -->
-    <link rel="stylesheet" href="/static/styles.css"> 
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"> 
 </head> <!-- Cierra la sección de metadatos. -->
 <body> <!-- Abre el cuerpo del documento; todo lo que esté aquí dentro será visible para el turista. -->
 
@@ -18,7 +18,7 @@
         <!-- Contenedor del logotipo oficial: Reemplazamos el texto plano por la imagen con enlace a la raíz -->
         <a href="/" class="logo-container">
             <!-- Vinculamos la ruta estática en formato PNG asegurando que Flask la sirva correctamente -->
-            <img src="/static/images/logo-transfers.png" alt="Logotipo ART-TOURS TRANSFER" class="logo-img">
+            <img src="{{ url_for('static', filename='images/logo-transfers.png') }}" alt="Logotipo ART-TOURS TRANSFER" class="logo-img">
         </a>
 
         <nav class="menu"> <!-- Define la sección de navegación para enlaces internos. -->
