@@ -90,24 +90,18 @@ nav a:hover {
    ========================================= */
 
 /* Seleccionamos la sección principal de bienvenida */
+/* Seleccionamos la sección principal de bienvenida */
 #hero {
-    /* Agregamos la barra diagonal al inicio (/static/images/...) para que el servidor local y Render ubiquen la foto sin error */
-    background: url('/static/images/playa-1-fondolargo.jpg') no-repeat center center/cover;
-    /* Aplicamos un filtro oscuro (negro al 60% de opacidad) para que las letras blancas resalten */
+    /* Quitamos el '/static/' inicial porque el CSS ya se encuentra dentro de esa carpeta */
+    /* Apuntamos directamente a la subcarpeta 'images/' */
+    background: url('images/playa-1-fondolargo.jpg') no-repeat center center/cover;
     background-color: rgba(0, 0, 0, 0.6); 
-    /* Mezclamos el color oscuro con la fotografía de fondo */
     background-blend-mode: overlay;
-    /* Asegura que esta sección ocupe el 100% de la altura de la pantalla del dispositivo (Viewport Height) */
     min-height: 100vh;
-    /* Usamos Flexbox para centrar el contenido interno */
     display: flex;
-    /* Apilamos los elementos de texto uno debajo del otro de forma vertical */
     flex-direction: column;
-    /* Centramos el contenido en el eje principal (vertical en este caso) */
     justify-content: center;
-    /* Centramos el contenido en el eje transversal (horizontal en este caso) */
     align-items: center;
-    /* Centramos la alineación del texto en sí mismo */
     text-align: center;
 }
 
