@@ -4,8 +4,8 @@ Flask==3.0.0
 # Servidor HTTP de grado de producción requerido por la plataforma Render para mantener la página en línea.
 gunicorn==21.2.0
 
-# Adaptador de base de datos. Sin versión específica para que descargue la compatible con Python 3.13.
+# Adaptador de base de datos. Sin versión específica para descargar la compatible con Python 3.13 de forma dinámica.
 psycopg2-binary
 
-# Herramienta de seguridad para leer nuestras contraseñas desde el archivo oculto .env.
+# Herramienta de seguridad para leer nuestras contraseñas desde el archivo oculto .env sin exponerlas.
 python-dotenv==1.0.0
