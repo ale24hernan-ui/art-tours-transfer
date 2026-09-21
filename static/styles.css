@@ -262,3 +262,75 @@ nav a:hover {
     /* Elevamos visualmente el botón 2 píxeles hacia arriba para dar sensación táctil */
     transform: translateY(-2px);
 }
+/* =========================================
+   ESTILOS DE REDES SOCIALES Y WHATSAPP FLOTANTE
+   ========================================= */
+
+/* Reglas para el botón flotante de WhatsApp */
+.btn-flotante-whatsapp {
+    /* Fija el botón respecto a la ventana del navegador, no importa si haces scroll */
+    position: fixed;
+    /* Lo separa 30 píxeles desde el borde inferior de la pantalla */
+    bottom: 30px;
+    /* Lo separa 30 píxeles desde el borde derecho de la pantalla */
+    right: 30px;
+    /* Aplica el color verde oficial de la marca WhatsApp */
+    background-color: #25d366;
+    /* El ícono de adentro será de color blanco puro */
+    color: #ffffff;
+    /* Hacemos el botón un círculo perfecto (ancho y alto iguales) */
+    width: 60px;
+    height: 60px;
+    /* border-radius 50% redondea un cuadrado hasta hacerlo un círculo */
+    border-radius: 50%;
+    /* Centramos el ícono usando Flexbox */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Hacemos el ícono de FontAwesome más grande */
+    font-size: 35px;
+    /* Agregamos una sombra oscura para que parezca que flota sobre la página */
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+    /* Preparamos una animación suave para cuando el mouse pase por encima */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    /* Aseguramos que siempre esté por encima de fotos y textos (Z-index alto) */
+    z-index: 1000;
+    /* Quitamos el subrayado típico de los enlaces HTML */
+    text-decoration: none;
+}
+
+/* Efecto Hover: Lo que pasa cuando el turista pone el mouse sobre el botón de WhatsApp */
+.btn-flotante-whatsapp:hover {
+    /* El botón crece un 10% (scale 1.1) para invitar al clic */
+    transform: scale(1.1);
+    /* La sombra se hace más grande, dando la ilusión de que el botón se acerca al usuario */
+    box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.5);
+    /* Aseguramos que el ícono siga siendo blanco */
+    color: #ffffff;
+}
+
+/* Estilos para el contenedor de redes en el pie de página (Footer) */
+.redes-sociales {
+    /* Margen para separarlo de los correos y del texto de derechos reservados */
+    margin: 20px 0;
+}
+
+/* Estilos para el enlace/botón de Facebook */
+.icono-facebook {
+    /* Usamos el color Azul Cian oficial de tu marca en lugar del azul de Facebook para mantener identidad visual */
+    color: #00bfff;
+    /* Quitamos el subrayado */
+    text-decoration: none;
+    /* Tamaño de letra legible */
+    font-size: 1.2rem;
+    /* Fuente en negritas para destacar */
+    font-weight: bold;
+    /* Transición suave para el cambio de color */
+    transition: color 0.3s ease;
+}
+
+/* Efecto Hover para el enlace de Facebook */
+.icono-facebook:hover {
+    /* Se oscurece ligeramente al pasar el cursor */
+    color: #0099cc;
+}
