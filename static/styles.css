@@ -334,3 +334,158 @@ nav a:hover {
     /* Se oscurece ligeramente al pasar el cursor */
     color: #0099cc;
 }
+/* =========================================
+   6. SECCIONES: SERVICIOS Y FLOTA (DISEÑO GENERAL)
+   ========================================= */
+
+/* Estilos comunes para ambas secciones (servicios y flota) */
+#servicios, #flota {
+    /* Fondo muy claro para contrastar con el blanco puro de las tarjetas */
+    background-color: #f4f4f9; 
+    /* Relleno: 60px arriba/abajo, 20px a los lados (para que no pegue en el borde del celular) */
+    padding: 60px 20px;
+    /* Todo el texto dentro de estas secciones irá centrado */
+    text-align: center;
+}
+
+/* Estilo para los títulos principales (H2) de estas secciones */
+#servicios h2, #flota h2 {
+    /* Color oscuro */
+    color: #333;
+    /* Margen abajo para separarlos de las tarjetas */
+    margin-bottom: 40px;
+    /* Tamaño de fuente grande */
+    font-size: 32px;
+}
+
+/* =========================================
+   7. CONTENEDORES Y TARJETAS (FLEXBOX)
+   ========================================= */
+
+/* Contenedor que agrupa las tarjetas. Aquí sucede la "magia" responsiva */
+.contenedor-tarjetas {
+    /* Activamos Flexbox */
+    display: flex;
+    /* Permite que si las tarjetas no caben en una fila, pasen a la de abajo automáticamente */
+    flex-wrap: wrap;
+    /* Centra las tarjetas horizontalmente */
+    justify-content: center;
+    /* Espacio o hueco de 30px entre cada tarjeta */
+    gap: 30px;
+    /* Ancho máximo para que en pantallas gigantes no se estire de más */
+    max-width: 1200px;
+    /* Margen auto a los lados para centrar el contenedor en la pantalla */
+    margin: 0 auto;
+}
+
+/* Estilos individuales para CADA tarjeta de servicio y de vehículo */
+.tarjeta-servicio, .tarjeta-vehiculo {
+    /* Fondo blanco puro para que resalte sobre el fondo gris claro */
+    background-color: #ffffff;
+    /* Borde redondeado suave para un look moderno */
+    border-radius: 10px;
+    /* Relleno interno para que el texto no toque los bordes */
+    padding: 30px;
+    /* Ancho base de cada tarjeta. Usamos calc() para restar el espacio del gap y que quepan 3 en una fila */
+    width: calc(33.333% - 30px);
+    /* Ancho mínimo para que en celulares no se hagan súper delgadas */
+    min-width: 280px;
+    /* Sombra muy sutil para dar efecto de "elevación" (3D) */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    /* Transición suave para el efecto al pasar el mouse */
+    transition: transform 0.3s ease;
+}
+
+/* Efecto Hover: Cuando el usuario pasa el mouse por encima de una tarjeta */
+.tarjeta-servicio:hover, .tarjeta-vehiculo:hover {
+    /* La tarjeta "sube" 10 píxeles, dando interactividad */
+    transform: translateY(-10px);
+}
+
+/* Ajustes para el texto dentro de las tarjetas */
+.tarjeta-servicio h3, .tarjeta-vehiculo h4 {
+    color: #00bfff; /* Color azul cian oficial de la marca */
+    margin-bottom: 15px;
+}
+
+.tarjeta-servicio p, .tarjeta-vehiculo p {
+    color: #666;
+    line-height: 1.5;
+}
+
+/* =========================================
+   8. PLACEHOLDER (MARCADOR) DE IMÁGENES DE VEHÍCULOS
+   ========================================= */
+
+/* Este es un espacio reservado temporal hasta que el cliente te mande las fotos reales */
+.placeholder-img {
+    /* Fondo gris medio */
+    background-color: #ddd;
+    /* Altura fija de 150px para visualizar el espacio que ocupará la foto */
+    height: 150px;
+    /* Separación superior */
+    margin-top: 20px;
+    /* Centrar texto verticalmente */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Color de texto oscuro */
+    color: #555;
+    /* Bordes ligeramente redondeados */
+    border-radius: 5px;
+}
+/* =========================================
+   9. MEJORAS DE UI: TIPOGRAFÍA Y FORMULARIOS
+   ========================================= */
+
+/* Sobrescribimos la regla general para aplicar la nueva fuente en toda la página */
+* {
+    /* Cambiamos la fuente genérica por Montserrat, dejando sans-serif como respaldo en caso de fallo */
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* Aplicamos estilos modernos a todos los inputs (cajas de texto/números/fechas) y selects (listas desplegables) */
+input, select {
+    /* Ocupan el 100% del ancho disponible en su contenedor */
+    width: 100%;
+    /* Relleno interno cómodo para que el texto no se vea apretado */
+    padding: 12px 15px;
+    /* Separación inferior entre cada campo */
+    margin-bottom: 15px;
+    /* Borde sutil y moderno en color gris claro */
+    border: 1px solid #ccc;
+    /* Bordes ligeramente redondeados */
+    border-radius: 8px;
+    /* Tamaño de letra legible */
+    font-size: 16px;
+    /* Color de texto oscuro y elegante */
+    color: #333;
+    /* Quitamos el estilo antiguo que Safari, Chrome o Edge le ponen por defecto a las listas desplegables */
+    appearance: none; 
+    /* Cambiamos el cursor a una 'mano' cuando el usuario pase el mouse por una lista desplegable */
+    cursor: pointer;
+    /* Transición suave al hacer clic en ellos */
+    transition: border-color 0.3s ease;
+}
+
+/* Efecto Focus: Cuando el cliente hace clic dentro del campo para escribir */
+input:focus, select:focus {
+    /* Quitamos el contorno negro feo por defecto */
+    outline: none;
+    /* Cambiamos el color del borde al Azul Cian de la marca para indicar que está activo */
+    border-color: #00bfff;
+    /* Añadimos un pequeño resplandor azul alrededor */
+    box-shadow: 0 0 5px rgba(0, 191, 255, 0.3);
+}
+
+/* Agregamos una flecha personalizada a los menús desplegables ya que le quitamos la de defecto con appearance:none */
+select {
+    /* Ponemos un icono de flecha hacia abajo como fondo de la caja, posicionado a la derecha */
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+    /* Evita que la flechita se repita como mosaico */
+    background-repeat: no-repeat;
+    /* Posiciona la flechita a la derecha (95%) y al centro verticalmente */
+    background-position: right 15px center;
+    /* Tamaño de la flechita */
+    background-size: 12px;
+}

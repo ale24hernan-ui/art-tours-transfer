@@ -1,105 +1,146 @@
 <!DOCTYPE html> <!-- Declara que este documento usa el estándar HTML5 moderno. -->
-<html lang="es"> <!-- Define el idioma español para mejorar el posicionamiento SEO en búsquedas en Cancún. -->
-<head> <!-- Abre la cabecera: contiene datos invisibles para el usuario pero vitales para el navegador. -->
-    <meta charset="UTF-8"> <!-- Permite usar acentos y caracteres latinos sin que el texto se deforme. -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Instruye al navegador para adaptar la web a pantallas de celulares (Responsive). -->
-    <title>ART-TOURS TRANSFER | Transporte Privado en Cancún</title> <!-- El título que aparece en la pestaña del navegador. -->
+<html lang="es"> <!-- Define el idioma español para mejorar el posicionamiento SEO. -->
+<head> 
+    <meta charset="UTF-8"> <!-- Permite usar acentos y caracteres latinos. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Hace la web responsiva para celulares. -->
+    <title>ART-TOURS TRANSFER | Transporte Privado en Cancún</title>
     
-    <!-- Importamos los íconos vectoriales de FontAwesome desde un servidor externo (CDN). -->
+    <!-- Importamos los íconos vectoriales de FontAwesome. -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Conectamos el archivo CSS usando Jinja2 para que Flask construya la ruta dinámica exacta. -->
-    <!-- Mantenemos el '?v=1.1' para forzar la actualización de la memoria caché del navegador (Cache Busting). -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=1.2">
-</head> <!-- Cierra la cabecera. -->
+    <!-- Importamos la fuente Montserrat desde los servidores de Google Fonts. -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Conectamos el archivo CSS de forma dinámica usando Jinja2. -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=1.3">
+</head>
 
-<body> <!-- Abre el cuerpo visible: todo lo que está aquí se renderizará en la pantalla del turista. -->
+<body> <!-- Abre el cuerpo visible de la página web. TODO DEBE IR AQUÍ ADENTRO. -->
 
-    <header class="navbar"> <!-- Define el bloque superior de la barra de navegación negra. -->
-        
-        <!-- Envolvemos la imagen en un enlace ('a') que apunta a la raíz ('/'), funcionando como un botón de "Inicio". -->
+    <header class="navbar"> 
         <a href="/" class="logo-container">
-            <!-- Insertamos el logotipo oficial PNG llamándolo desde la subcarpeta static/images/. -->
             <img src="{{ url_for('static', filename='images/logo-transfers.png') }}" alt="Logotipo ART-TOURS TRANSFER" class="logo-img">
-        </a> <!-- Cierra el enlace del logotipo. -->
+        </a> 
 
-        <nav> <!-- Abre el contenedor para los botones del menú de navegación a la derecha. -->
-            <a href="#servicios">Nuestros Servicios</a> <!-- Enlace ancla hacia la futura sección de servicios. -->
-            <a href="#flota">Nuestra Flota</a> <!-- Enlace ancla hacia la futura galería de vehículos. -->
-            <a href="#contacto">Contacto</a> <!-- Enlace ancla hacia la sección inferior de datos de contacto. -->
-        </nav> <!-- Cierra el contenedor de navegación. -->
+        <nav> 
+            <a href="#servicios">Nuestros Servicios</a> 
+            <a href="#flota">Nuestra Flota</a> 
+            <a href="#contacto">Contacto</a> 
+        </nav> 
+    </header> 
 
-    </header> <!-- Cierra la barra superior. -->
-
-    <!-- ========================================================================= -->
-    <!-- LA CLAVE DE LA CORRECCIÓN: SECCIÓN HERO -->
-    <!-- Este bloque debe envolver todo el contenido inicial para que CSS aplique la imagen 'playa-1-fondolargo.jpg'. -->
-    <!-- ========================================================================= -->
+    <!-- SECCIÓN HERO -->
     <section id="hero"> 
-
-        <!-- Titular principal para captar la atención del turista inmediatamente. -->
         <h1>Reserva tu Traslado en Cancún</h1>
-        
-        <!-- Subtítulo que refuerza la propuesta de valor comercial. -->
         <p>Viaje seguro, privado y sin demoras hacia tu hotel.</p>
 
-        <!-- Contenedor del widget de cotización rápida. -->
+        <!-- WIDGET DE RESERVACIÓN -->
         <div class="widget-reserva">
-            <!-- Formulario de captura; envía datos de forma segura (POST) a la ruta '/reservar' que procesará Flask. -->
-            <form action="/reservar" method="POST">
+            <form action="/reservar" method="POST" id="formulario-reserva">
                 
-                <label for="pasajeros">Número de Pasajeros:</label> <!-- Etiqueta descriptiva para el campo numérico. -->
+                <label for="pasajeros">Número de Pasajeros:</label>
+                <!-- Restricción inicial de max="40" alineada a la flota. -->
+                <input type="number" id="pasajeros" name="pasajeros" min="1" max="40" required>
                 
-                <!-- Input de pasajeros con restricción dura de 1 a 8, respetando la capacidad real de tu Van. -->
-                <input type="number" id="pasajeros" name="pasajeros" min="1" max="8" required>
-                
-                <button type="submit">Verificar Disponibilidad</button> <!-- Botón que acciona el envío del formulario. -->
-                
-            </form> <!-- Cierra el formulario de reservación. -->
-        </div> <!-- Cierra el widget. -->
+                <label for="vehiculo">Vehículo Asignado:</label>
+                <select id="vehiculo" name="vehiculo" required>
+                    <option value="" disabled selected>Selecciona o ingresa pasajeros</option>
+                    <option value="auto">Auto Privado (Máx 4)</option>
+                    <option value="van">Van Ejecutiva (Máx 8)</option>
+                    <option value="autobus">Autobús / Crafter (Máx 40)</option>
+                </select>
 
-    </section> <!-- Cierra la sección Hero. Esto detiene la imagen de fondo y permite que la página continúe bajando. -->
+                <label for="origen">Lugar de Inicio:</label>
+                <select id="origen" name="origen" required>
+                    <option value="" disabled selected>¿Dónde te recogemos?</option>
+                    <option value="aeropuerto_cun">Aeropuerto Internacional de Cancún</option>
+                    <option value="hotel_zona_hotelera">Zona Hotelera Cancún</option>
+                    <option value="centro_cancun">Centro de Cancún</option>
+                </select>
 
-    <!-- Abre la sección final informativa al fondo de la página. -->
-    <section id="contacto">
-        <h3>Contacto Directo</h3> <!-- Título de la sección. -->
-        <!-- Mostramos el WhatsApp corporativo oficial establecido en tus reglas de negocio. -->
-        <p>WhatsApp: (+52) 998 215 6446</p>
-        <!-- Mostramos el correo electrónico corporativo. -->
-        <p>Email: aztec360@msn.com</p>
-        <!-- Texto legal que otorga autoridad y profesionalismo a la marca. -->
-        <p>© 2026 ART-TOURS TRANSFER. Todos los derechos reservados.</p>
-    </section> <!-- Cierra la sección de contacto. -->
+                <label for="destino">Destino:</label>
+                <select id="destino" name="destino" required>
+                    <option value="" disabled selected>¿A dónde vamos?</option>
+                    <option value="hotel_playa_carmen">Playa del Carmen</option>
+                    <option value="hotel_tulum">Tulum</option>
+                    <option value="aeropuerto_cun">Aeropuerto Internacional de Cancún</option>
+                </select>
 
-</body> <!-- Cierra el cuerpo visible. -->
-</html> <!-- Fin absoluto del documento HTML. -->
-<!-- ========================================================================= -->
+                <label for="fecha_hora">Fecha y Hora del Traslado:</label>
+                <input type="datetime-local" id="fecha_hora" name="fecha_hora" required>
+                
+                <!-- CONTENEDOR DE PRECIO DINÁMICO -->
+                <div id="contenedor-precio" style="margin-bottom: 20px; text-align: center; display: none;">
+                    <span style="font-size: 18px; color: #fff;">Tarifa Estimada: </span>
+                    <strong id="precio-total" style="font-size: 24px; color: #00bfff;">$0 USD</strong>
+                </div>
+
+                <button type="submit">Verificar Disponibilidad</button>
+            </form>
+        </div>
+    </section> 
+
+    <!-- SECCIÓN: NUESTROS SERVICIOS -->
+    <section id="servicios">
+        <h2>Nuestros Servicios de Traslado</h2>
+        <div class="contenedor-tarjetas">
+            <div class="tarjeta-servicio">
+                <h3>✈️ Aeropuerto ↔ Hotel</h3>
+                <p>Servicio directo, privado y sin esperas. Te recibimos en la terminal y te llevamos seguro a tu destino.</p>
+            </div>
+            <div class="tarjeta-servicio">
+                <h3>🗿 Tours y Ruinas</h3>
+                <p>Descubre Tulum, Chichén Itzá o Cobá. Viajes de ida y vuelta con chofer a tu disposición.</p>
+            </div>
+            <div class="tarjeta-servicio">
+                <h3>🎉 Eventos Especiales</h3>
+                <p>Bodas, congresos o grupos grandes. Coordinamos la logística para que todos lleguen a tiempo.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN: NUESTRA FLOTA -->
+    <section id="flota">
+        <h2>Nuestra Flota</h2>
+        <p class="subtitulo-flota">Vehículos modernos para cualquier tamaño de grupo</p>
+        <div class="contenedor-tarjetas">
+            <div class="tarjeta-vehiculo">
+                <h4>Auto Privado</h4>
+                <p>Hasta 4 pasajeros</p>
+                <div class="placeholder-img">[Imagen Auto]</div>
+            </div>
+            <div class="tarjeta-vehiculo">
+                <h4>Van Ejecutiva</h4>
+                <p>Hasta 8 pasajeros</p>
+                <div class="placeholder-img">[Imagen Van]</div>
+            </div>
+            <div class="tarjeta-vehiculo">
+                <h4>Autobús / Crafter</h4>
+                <p>Hasta 40 pasajeros</p>
+                <div class="placeholder-img">[Imagen Autobús]</div>
+            </div>
+        </div>
+    </section>
+
     <!-- BOTÓN FLOTANTE DE WHATSAPP -->
-    <!-- ========================================================================= -->
-    <!-- Usamos target="_blank" para que WhatsApp Web se abra en una pestaña nueva y no saque al cliente de tu página -->
-    <!-- El enlace wa.me incluye tu número oficial de Cancún y un texto codificado (%20 son espacios) para el mensaje automático -->
     <a href="https://wa.me/5219982156446?text=Hola,%20quiero%20información%20sobre%20un%20traslado" target="_blank" class="btn-flotante-whatsapp">
-        <!-- Llamamos al ícono vectorial de WhatsApp desde la librería FontAwesome que ya tienes vinculada en el <head> -->
         <i class="fab fa-whatsapp"></i>
     </a>
 
-    <!-- Abre la sección final informativa al fondo de la página. -->
+    <!-- SECCIÓN DE CONTACTO Y PIE DE PÁGINA -->
     <section id="contacto">
-        <h3>Contacto Directo</h3> <!-- Título de la sección. -->
-        <!-- Mostramos el WhatsApp corporativo oficial establecido en tus reglas de negocio. -->
+        <h3>Contacto Directo</h3>
         <p>WhatsApp: (+52) 998 215 6446</p>
-        <!-- Mostramos el correo electrónico corporativo. -->
         <p>Email: aztec360@msn.com</p>
         
-        <!-- Contenedor nuevo exclusivo para redes sociales en el pie de página -->
         <div class="redes-sociales">
-            <!-- Enlace oficial a la página de Facebook de Arturo Monroy / Art-Tours Transfers -->
             <a href="https://www.facebook.com/profile.php?id=100094865442979" target="_blank" class="icono-facebook">
-                <!-- Ícono de Facebook de FontAwesome -->
                 <i class="fab fa-facebook"></i> Síguenos en Facebook
             </a>
         </div>
-
-        <!-- Texto legal que otorga autoridad y profesionalismo a la marca. -->
         <p>© 2026 ART-TOURS TRANSFER. Todos los derechos reservados.</p>
-    </section> <!-- Cierra la sección de contacto. -->
+    </section> 
+
+    <!-- El script de JavaScript siempre debe ser la última línea antes de cerrar el body. -->
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+
+</body> <!-- AHORA SÍ, AQUÍ SE CIERRA EL CUERPO DE LA PÁGINA -->
+</html>
