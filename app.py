@@ -1,5 +1,3 @@
-# Importaciones de la biblioteca estándar.
-# ¿Por qué y para qué?: Módulos nativos para interactuar con el sistema, RAM y manipulación de URLs.
 import os
 import io
 import base64
@@ -10,20 +8,12 @@ import urllib.error
 from functools import wraps
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-
-# Importaciones de terceros (Frameworks).
 from flask import Flask, render_template, request, session, redirect, url_for, send_file, jsonify
 from fpdf import FPDF
 from db import obtener_conexion_db
 
 app = Flask(__name__)
-
-# Llave secreta para encriptar cookies de sesión.
 app.secret_key = os.environ.get("FLASK_SECRET_KEY")
-
-# ==========================================
-# RUTAS DE INTERFAZ Y CAPTURA DE LEADS (B2C)
-# ==========================================
 
 @app.route('/')
 def index():
@@ -45,7 +35,6 @@ def reservar():
         conn = obtener_conexion_db()
         cursor = conn.cursor()
         
-        # 1. Inserción del Cliente (Tabla Padre).
         cursor.execute("""
             INSERT INTO clientes (nombre_completo, telefono) 
             VALUES (%s, %s) 
@@ -53,7 +42,6 @@ def reservar():
         """, (nombre, telefono))
         id_cliente = cursor.fetchone()[0]
         
-        # 2. Inserción de la Reserva (Tabla Hija).
         cursor.execute("""
             INSERT INTO reservas (id_cliente, origen, destino, fecha_hora_servicio, numero_pasajeros) 
             VALUES (%s, %s, %s, %s, %s)
@@ -63,7 +51,6 @@ def reservar():
         
         conn.commit()
         
-        # 3. Construcción del Payload para Meta (WhatsApp).
         mensaje = f"Hola, soy {nombre}. Quiero confirmar mi traslado de {origen} a {destino} para {pasajeros} pasajeros el día {fecha_hora}. Folio interno: #{id_reserva}."
         mensaje_codificado = urllib.parse.quote(mensaje)
         numero_empresa = "5219982156446"
@@ -74,14 +61,9 @@ def reservar():
     except Exception as e:
         if conn: conn.rollback()
         return f"Error interno al procesar la reserva: {str(e)}", 500
-        
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
-
-# ==========================================
-# RUTAS DE ADMINISTRACIÓN Y AUTENTICACIÓN (SaaS)
-# ==========================================
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -100,10 +82,6 @@ def panel_admin():
     if not session.get('admin_logeado'):
         return redirect(url_for('login'))
     return render_template('admin.html')
-
-# ==========================================
-# RUTAS TRANSACCIONALES (MÁQUINA DE ESTADOS)
-# ==========================================
 
 @app.route('/admin/viaje/<int:id_reserva>/estado', methods=['POST'])
 def actualizar_estado_viaje(id_reserva):
@@ -182,10 +160,6 @@ def iniciar_viaje_seguro(id_reserva):
         if cursor: cursor.close()
         if conn: conn.close()
 
-# ==========================================
-# REPORTES Y CIERRES DE JORNADA
-# ==========================================
-
 @app.route('/admin/cierre_diario', methods=['POST'])
 def cierre_diario():
     conn = None
@@ -245,7 +219,6 @@ def cierre_diario():
             "archivo_pdf_b64": pdf_b64
         }
         
-        # ¿Por qué y para qué?: Sustituimos 'requests' por urllib nativo. Esto previene conflictos de directivas de seguridad en Windows al evitar la carga de binarios compilados en formato .dll o .pyx.
         try:
             if webhook_url:
                 datos_json = json.dumps(payload_n8n).encode('utf-8')
@@ -256,7 +229,7 @@ def cierre_diario():
                 )
                 urllib.request.urlopen(peticion_http, timeout=3)
         except Exception:
-            pass # Falla silenciosa permitida para asegurar que el PDF se descargue localmente.
+            pass
         
         salida_pdf.seek(0)
         return send_file(salida_pdf, as_attachment=True, download_name=f'Reporte_Diario_{fecha_actual_cancun}.pdf', mimetype='application/pdf')
@@ -280,7 +253,7 @@ def requerir_api_key(f):
 @app.route('/api/v1/automatizacion/reporte-semanal', methods=['POST'])
 @requerir_api_key
 def trigger_reporte_semanal():
-    return jsonify({"status": "success", "mensaje": "Endpoint reservado para expansión n8n."}), 200
+    return jsonify({"status": "success", "mensaje": "Endpoint reservado."}), 200
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
