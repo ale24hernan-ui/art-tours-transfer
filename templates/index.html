@@ -1,25 +1,24 @@
-<!DOCTYPE html> <!-- Declara que este documento usa el estándar HTML5 moderno. -->
-<html lang="es"> <!-- Define el idioma español para mejorar el posicionamiento SEO. -->
+<!DOCTYPE html>
+<!-- ¿Por qué?: HTML5 estándar. ¿Para qué?: Garantiza compatibilidad con todos los navegadores móviles modernos. -->
+<html lang="es">
 <head> 
-    <meta charset="UTF-8"> <!-- Permite usar acentos y caracteres latinos. -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Hace la web responsiva para celulares. -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ART-TOURS TRANSFER | Transporte Privado en Cancún</title>
     
-    <!-- Importamos los íconos vectoriales de FontAwesome. -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Importamos la fuente Montserrat desde los servidores de Google Fonts. -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- Conectamos el archivo CSS de forma dinámica usando Jinja2. -->
+    
+    <!-- ¿Por qué?: Inyección de Jinja2 con control de caché (?v=1.3). -->
+    <!-- ¿Para qué?: Fuerza al navegador a descargar el CSS más reciente al actualizar estilos, evitando que los clientes vean la web rota. -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=1.3">
 </head>
 
-<body> <!-- Abre el cuerpo visible de la página web. TODO DEBE IR AQUÍ ADENTRO. -->
-
+<body> 
     <header class="navbar"> 
         <a href="/" class="logo-container">
             <img src="{{ url_for('static', filename='images/logo-transfers.png') }}" alt="Logotipo ART-TOURS TRANSFER" class="logo-img">
         </a> 
-
         <nav> 
             <a href="#servicios">Nuestros Servicios</a> 
             <a href="#flota">Nuestra Flota</a> 
@@ -27,58 +26,64 @@
         </nav> 
     </header> 
 
-    <!-- SECCIÓN HERO -->
     <section id="hero"> 
         <h1>Reserva tu Traslado en Cancún</h1>
         <p>Viaje seguro, privado y sin demoras hacia tu hotel.</p>
 
-        <!-- WIDGET DE RESERVACIÓN -->
         <div class="widget-reserva">
+            <!-- ¿Por qué?: Formulario apunta a '/reservar' mediante POST. -->
+            <!-- ¿Para qué?: Flask interceptará esta ruta, guardará el Lead en PostgreSQL y luego detonará la redirección a WhatsApp. -->
             <form action="/reservar" method="POST" id="formulario-reserva">
                 
-                <label for="pasajeros">Número de Pasajeros:</label>
-                <!-- Restricción inicial de max="40" alineada a la flota. -->
-                <input type="number" id="pasajeros" name="pasajeros" min="1" max="40" required>
+                <!-- ========================================== -->
+                <!-- NUEVOS CAMPOS OBLIGATORIOS (TABLA: clientes) -->
+                <!-- ========================================== -->
+                <label for="nombre">Nombre Completo:</label>
+                <!-- ¿Por qué?: Input de texto obligatorio. ¿Para qué?: Requisito estricto (NOT NULL) para instanciar al usuario en la BD antes de crear la reserva. -->
+                <input type="text" id="nombre" name="nombre" placeholder="Ej. Juan Pérez" required>
                 
-                <label for="vehiculo">Vehículo Asignado:</label>
-                <select id="vehiculo" name="vehiculo" required>
-                    <option value="" disabled selected>Selecciona o ingresa pasajeros</option>
-                    <option value="auto">Auto Privado (Máx 4)</option>
-                    <option value="van">Van Ejecutiva (Máx 8)</option>
-                    <option value="autobus">Autobús / Crafter (Máx 40)</option>
-                </select>
+                <label for="telefono">Teléfono Móvil (WhatsApp):</label>
+                <!-- ¿Por qué?: Tipo 'tel' abre el teclado numérico en celulares. ¿Para qué?: Captura la variable esencial para generar el link dinámico de wa.me. -->
+                <input type="tel" id="telefono" name="telefono" placeholder="+52 998 000 0000" required>
+                
+                <!-- ========================================== -->
+                <!-- CAMPOS OPERATIVOS (TABLA: reservas)        -->
+                <!-- ========================================== -->
+                <label for="pasajeros">Número de Pasajeros:</label>
+                <!-- ¿Por qué?: min="1" max="8". ¿Para qué?: Alineado estrictamente a la capacidad de la Van ejecutiva para evitar sobreventa logística. -->
+                <input type="number" id="pasajeros" name="pasajeros" min="1" max="8" required>
 
-                <label for="origen">Lugar de Inicio:</label>
-                <select id="origen" name="origen" required>
+                <label for="origen_select">Lugar de Inicio:</label>
+                <!-- ¿Por qué?: Selector rígido con onchange. ¿Para qué?: Mantiene la base de datos limpia de errores ortográficos (Ej. "aeropuerto" vs "aereopuerto"). -->
+                <select id="origen_select" name="origen" required>
                     <option value="" disabled selected>¿Dónde te recogemos?</option>
-                    <option value="aeropuerto_cun">Aeropuerto Internacional de Cancún</option>
-                    <option value="hotel_zona_hotelera">Zona Hotelera Cancún</option>
-                    <option value="centro_cancun">Centro de Cancún</option>
+                    <option value="Aeropuerto Cancún">Aeropuerto Cancún</option>
+                    <option value="Zona Hotelera Cancún">Zona Hotelera Cancún</option>
+                    <option value="Tulum">Tulum</option>
+                    <option value="Playa del Carmen">Playa del Carmen</option>
+                    <option value="Otro">Otro (Especificar en notas)</option>
                 </select>
 
-                <label for="destino">Destino:</label>
-                <select id="destino" name="destino" required>
+                <label for="destino_select">Destino:</label>
+                <select id="destino_select" name="destino" required>
                     <option value="" disabled selected>¿A dónde vamos?</option>
-                    <option value="hotel_playa_carmen">Playa del Carmen</option>
-                    <option value="hotel_tulum">Tulum</option>
-                    <option value="aeropuerto_cun">Aeropuerto Internacional de Cancún</option>
+                    <option value="Zona Hotelera Cancún">Zona Hotelera Cancún</option>
+                    <option value="Playa del Carmen">Playa del Carmen</option>
+                    <option value="Tulum">Tulum</option>
+                    <option value="Aeropuerto Cancún">Aeropuerto Cancún</option>
+                    <option value="Otro">Otro (Especificar en notas)</option>
                 </select>
 
                 <label for="fecha_hora">Fecha y Hora del Traslado:</label>
+                <!-- ¿Por qué?: datetime-local. ¿Para qué?: Entrega el formato estándar (YYYY-MM-DDTHH:MM) listo para ser parseado por Python e inyectado como TIMESTAMP en PostgreSQL. -->
                 <input type="datetime-local" id="fecha_hora" name="fecha_hora" required>
-                
-                <!-- CONTENEDOR DE PRECIO DINÁMICO -->
-                <div id="contenedor-precio" style="margin-bottom: 20px; text-align: center; display: none;">
-                    <span style="font-size: 18px; color: #fff;">Tarifa Estimada: </span>
-                    <strong id="precio-total" style="font-size: 24px; color: #00bfff;">$0 USD</strong>
-                </div>
 
-                <button type="submit">Verificar Disponibilidad</button>
+                <button type="submit">Cotizar por WhatsApp</button>
             </form>
         </div>
     </section> 
 
-    <!-- SECCIÓN: NUESTROS SERVICIOS -->
+    <!-- Resto del HTML intacto (Servicios, Flota, Footer) -->
     <section id="servicios">
         <h2>Nuestros Servicios de Traslado</h2>
         <div class="contenedor-tarjetas">
@@ -97,40 +102,26 @@
         </div>
     </section>
 
-    <!-- SECCIÓN: NUESTRA FLOTA -->
     <section id="flota">
         <h2>Nuestra Flota</h2>
         <p class="subtitulo-flota">Vehículos modernos para cualquier tamaño de grupo</p>
         <div class="contenedor-tarjetas">
             <div class="tarjeta-vehiculo">
-                <h4>Auto Privado</h4>
-                <p>Hasta 4 pasajeros</p>
-                <div class="placeholder-img">[Imagen Auto]</div>
-            </div>
-            <div class="tarjeta-vehiculo">
                 <h4>Van Ejecutiva</h4>
                 <p>Hasta 8 pasajeros</p>
                 <div class="placeholder-img">[Imagen Van]</div>
             </div>
-            <div class="tarjeta-vehiculo">
-                <h4>Autobús / Crafter</h4>
-                <p>Hasta 40 pasajeros</p>
-                <div class="placeholder-img">[Imagen Autobús]</div>
-            </div>
         </div>
     </section>
 
-    <!-- BOTÓN FLOTANTE DE WHATSAPP -->
     <a href="https://wa.me/5219982156446?text=Hola,%20quiero%20información%20sobre%20un%20traslado" target="_blank" class="btn-flotante-whatsapp">
         <i class="fab fa-whatsapp"></i>
     </a>
 
-    <!-- SECCIÓN DE CONTACTO Y PIE DE PÁGINA -->
     <section id="contacto">
         <h3>Contacto Directo</h3>
         <p>WhatsApp: (+52) 998 215 6446</p>
         <p>Email: aztec360@msn.com</p>
-        
         <div class="redes-sociales">
             <a href="https://www.facebook.com/profile.php?id=100094865442979" target="_blank" class="icono-facebook">
                 <i class="fab fa-facebook"></i> Síguenos en Facebook
@@ -139,8 +130,7 @@
         <p>© 2026 ART-TOURS TRANSFER. Todos los derechos reservados.</p>
     </section> 
 
-    <!-- El script de JavaScript siempre debe ser la última línea antes de cerrar el body. -->
+    <!-- ¿Por qué?: Centralización de scripts estáticos. ¿Para qué?: Previene errores sintácticos de Jinja2 y mantiene el DOM de HTML limpio de lógica de negocio. -->
     <script src="{{ url_for('static', filename='app.js') }}"></script>
-
-</body> <!-- AHORA SÍ, AQUÍ SE CIERRA EL CUERPO DE LA PÁGINA -->
+</body>
 </html>

@@ -9,3 +9,6 @@ psycopg2-binary
 
 # Herramienta de seguridad para leer nuestras contraseñas desde el archivo oculto .env sin exponerlas.
 python-dotenv==1.0.0
+
+#Para que nuestro backend en Flask pueda "dibujar" un PDF del reporte final
+pip freeze > requirements.txt
