@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <!-- ¿Por qué?: Fuerza a los navegadores móviles a renderizar al ancho real del dispositivo sin hacer zoom. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso | ART-TOURS TRANSFER</title>
+    
+    <!-- Tipografía corporativa importada directamente. -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- ESTILOS INTERNOS (CSS) -->
+    <!-- ¿Por qué?: Para una pantalla de login tan pequeña, inyectar el CSS aquí reduce las peticiones HTTP y acelera la carga. -->
+    <style>
+        :root {
+            --color-principal: #00bfff; /* Azul Cian corporativo */
+            --color-fondo: #0a0a0a;   /* Negro profundo */
+            --color-texto: #ffffff;   /* Blanco puro */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--color-fondo);
+            color: var(--color-texto);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Ocupa el 100% de la altura de la pantalla del celular */
+            overflow: hidden;
+        }
+
+        .login-container {
+            width: 90%;
+            max-width: 400px;
+            /* Efecto Glassmorphism paramétrico */
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .login-container h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--color-principal);
+        }
+
+        .login-container p {
+            font-size: 14px;
+            margin-bottom: 30px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--color-texto);
+            font-size: 16px; /* Importante: En iOS, inputs menores a 16px hacen zoom automático (UX hostil). */
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        /* Indicador visual de enfoque para accesibilidad. */
+        .form-group input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-bottom: 2px solid var(--color-principal);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--color-principal);
+            color: var(--color-fondo);
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98); /* Feedback háptico visual al presionar en la pantalla táctil */
+            background-color: #008fbf;
+        }
+
+        /* Contenedor dinámico para mostrar mensajes de error desde Flask. */
+        .error-message {
+            color: #ff4d4d;
+            font-size: 13px;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <h1>Operaciones SaaS</h1>
+        <p>ART-TOURS TRANSFER</p>
+
+        <!-- ¿Por qué?: Enviaremos los datos al mismo endpoint (/login) usando el método seguro POST. -->
+        <!-- ¿Para qué?: Previene que la contraseña se filtre en el historial del navegador (URL parameters). -->
+        <form action="/login" method="POST">
+            
+            <div class="form-group">
+                <label for="password">Clave de Acceso Master:</label>
+                <!-- Type="password" oculta los caracteres con asteriscos/puntos. -->
+                <!-- required previene el envío de campos vacíos, ahorrando peticiones inútiles al servidor. -->
+                <input type="password" id="password" name="password" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn-submit">Ingresar al Panel</button>
+            
+            <!-- Inyección Jinja2: Solo se renderiza si hay un mensaje (Flash) desde el servidor. -->
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <div class="error-message">
+                  {{ messages[0] }}
+                </div>
+              {% endif %}
+            {% endwith %}
+        </form>
+    </div>
+
+</body>
+</html>

@@ -69,12 +69,16 @@ def reservar():
 def login():
     if request.method == 'POST':
         password_ingresada = request.form.get('password')
+        # Validamos contra tu archivo .env
         if password_ingresada == os.environ.get("ADMIN_PASSWORD"):
             session['admin_logeado'] = True
             session['id_chofer'] = 1 
             return redirect(url_for('panel_admin'))
         else:
-            return "Contraseña incorrecta", 401
+            # En lugar de devolver un string crudo con error 401, enviamos un mensaje a la UI
+            flash("Contraseña incorrecta. Intente de nuevo.")
+            return render_template('login.html')
+            
     return render_template('login.html')
 
 @app.route('/admin')
