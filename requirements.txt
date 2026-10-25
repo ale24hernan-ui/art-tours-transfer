@@ -1,14 +1,17 @@
-# Framework web principal para levantar el servidor y conectar el HTML.
+# requirements.txt
+# Framework web principal para levantar el servidor.
 Flask==3.0.0
 
-# Servidor HTTP de grado de producción requerido por la plataforma Render para mantener la página en línea.
+# Servidor HTTP de grado de producción requerido por Render.
 gunicorn==21.2.0
 
-# Adaptador de base de datos. Sin versión específica para descargar la compatible con Python 3.13 de forma dinámica.
+# Adaptador de base de datos PostgreSQL.
 psycopg2-binary
 
-# Herramienta de seguridad para leer nuestras contraseñas desde el archivo oculto .env sin exponerlas.
+# Gestor seguro de variables de entorno (.env).
 python-dotenv==1.0.0
 
-#Para que nuestro backend en Flask pueda "dibujar" un PDF del reporte final
-pip freeze > requirements.txt
+# Motor de generación de reportes PDF en memoria RAM.
+fpdf==1.7.2
+
+requests==2.31.0
