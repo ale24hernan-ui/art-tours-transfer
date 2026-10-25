@@ -1,20 +1,19 @@
 # Importaciones de la biblioteca estándar.
-# ¿Por qué y para qué?: Módulos nativos para interactuar con el sistema, RAM, codificación y manipulación de URLs.
+# ¿Por qué y para qué?: Módulos nativos para interactuar con el sistema, RAM y manipulación de URLs.
 import os
 import io
 import base64
+import json
 import urllib.parse
+import urllib.request
+import urllib.error
 from functools import wraps
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-# Importaciones de terceros.
-# ¿Por qué y para qué?: Flask orquesta la web, FPDF dibuja reportes y requests habilita a Flask como cliente HTTP para webhooks.
+# Importaciones de terceros (Frameworks).
 from flask import Flask, render_template, request, session, redirect, url_for, send_file, jsonify
 from fpdf import FPDF
-import requests
-
-# Importación del adaptador de base de datos local.
 from db import obtener_conexion_db
 
 app = Flask(__name__)
@@ -28,13 +27,10 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
 @app.route('/')
 def index():
-    # ¿Por qué y para qué?: Renderiza el frontend público. 
     return render_template('index.html')
 
 @app.route('/reservar', methods=['POST'])
 def reservar():
-    # Extracción de datos enviados por el formulario HTML.
-    # ¿Por qué y para qué?: Captura los inputs del usuario para procesarlos en la BD.
     nombre = request.form.get('nombre')
     telefono = request.form.get('telefono')
     pasajeros = request.form.get('pasajeros')
@@ -50,7 +46,6 @@ def reservar():
         cursor = conn.cursor()
         
         # 1. Inserción del Cliente (Tabla Padre).
-        # ¿Por qué y para qué?: Se usa RETURNING para capturar el ID auto-generado inmediatamente en memoria RAM y usarlo como llave foránea.
         cursor.execute("""
             INSERT INTO clientes (nombre_completo, telefono) 
             VALUES (%s, %s) 
@@ -59,7 +54,6 @@ def reservar():
         id_cliente = cursor.fetchone()[0]
         
         # 2. Inserción de la Reserva (Tabla Hija).
-        # ¿Por qué y para qué?: Relaciona operativamente el viaje con el cliente creado arriba.
         cursor.execute("""
             INSERT INTO reservas (id_cliente, origen, destino, fecha_hora_servicio, numero_pasajeros) 
             VALUES (%s, %s, %s, %s, %s)
@@ -67,29 +61,21 @@ def reservar():
         """, (id_cliente, origen, destino, fecha_hora, pasajeros))
         id_reserva = cursor.fetchone()[0]
         
-        # Confirmación atómica en disco duro.
         conn.commit()
         
         # 3. Construcción del Payload para Meta (WhatsApp).
-        # ¿Por qué y para qué?: Automatiza el texto de cotización incluyendo el folio (id_reserva) para que el dueño relacione el mensaje con la BD.
         mensaje = f"Hola, soy {nombre}. Quiero confirmar mi traslado de {origen} a {destino} para {pasajeros} pasajeros el día {fecha_hora}. Folio interno: #{id_reserva}."
-        
-        # urllib.parse.quote codifica espacios y caracteres especiales al estándar URL (ej. espacio -> %20).
         mensaje_codificado = urllib.parse.quote(mensaje)
         numero_empresa = "5219982156446"
         url_whatsapp = f"https://wa.me/{numero_empresa}?text={mensaje_codificado}"
         
-        # Redirección 302 hacia WhatsApp.
-        # ¿Por qué y para qué?: Asegura que la redirección a WA solo suceda si los datos se guardaron con éxito en PostgreSQL.
         return redirect(url_whatsapp)
         
     except Exception as e:
-        # Prevención de datos huérfanos.
         if conn: conn.rollback()
         return f"Error interno al procesar la reserva: {str(e)}", 500
         
     finally:
-        # Liberación de recursos.
         if cursor: cursor.close()
         if conn: conn.close()
 
@@ -259,11 +245,18 @@ def cierre_diario():
             "archivo_pdf_b64": pdf_b64
         }
         
+        # ¿Por qué y para qué?: Sustituimos 'requests' por urllib nativo. Esto previene conflictos de directivas de seguridad en Windows al evitar la carga de binarios compilados en formato .dll o .pyx.
         try:
             if webhook_url:
-                requests.post(webhook_url, json=payload_n8n, timeout=3)
-        except requests.exceptions.RequestException:
-            pass
+                datos_json = json.dumps(payload_n8n).encode('utf-8')
+                peticion_http = urllib.request.Request(
+                    webhook_url, 
+                    data=datos_json, 
+                    headers={'Content-Type': 'application/json'}
+                )
+                urllib.request.urlopen(peticion_http, timeout=3)
+        except Exception:
+            pass # Falla silenciosa permitida para asegurar que el PDF se descargue localmente.
         
         salida_pdf.seek(0)
         return send_file(salida_pdf, as_attachment=True, download_name=f'Reporte_Diario_{fecha_actual_cancun}.pdf', mimetype='application/pdf')
@@ -290,5 +283,4 @@ def trigger_reporte_semanal():
     return jsonify({"status": "success", "mensaje": "Endpoint reservado para expansión n8n."}), 200
 
 if __name__ == '__main__':
-    # Habilita el entorno de ejecución local.
     app.run(debug=True, port=5000)
