@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <!-- ¿Por qué?: Meta viewport estricto. ¿Para qué?: Previene zoom accidental y adapta la UI al ancho del pulgar (Thumb-Zone) del chofer. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Panel Operativo | ART-TOURS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --color-principal: #00bfff;
+            --color-fondo: #0a0a0a;
+            --color-tarjeta: rgba(255, 255, 255, 0.05);
+            --color-borde: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0;
+            padding: 20px 10px;
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--color-fondo);
+            color: #fff;
+            padding-bottom: 100px; /* Espacio para el botón flotante de cierre de día */
+        }
+
+        .header-panel {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header-panel h2 { margin: 0; color: var(--color-principal); }
+        .header-panel p { margin: 5px 0 0 0; font-size: 14px; opacity: 0.7; }
+
+        /* Estructura Glassmorphism para las Tarjetas Operativas */
+        .card-viaje {
+            background: var(--color-tarjeta);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--color-borde);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--color-borde);
+            padding-bottom: 10px;
+        }
+
+        .badge-estado {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .estado-pendiente { background-color: rgba(255, 165, 0, 0.2); color: #ffa500; }
+        .estado-progreso { background-color: rgba(0, 191, 255, 0.2); color: #00bfff; }
+
+        .card-body p { margin: 8px 0; font-size: 14px; }
+        .card-body i { width: 20px; color: var(--color-principal); }
+
+        .card-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-accion {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .btn-accion:active { transform: scale(0.95); }
+        .btn-iniciar { background-color: var(--color-principal); color: #000; }
+        .btn-finalizar { background-color: #28a745; color: #fff; }
+        
+        .btn-flotante-cierre {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            padding: 15px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 700;
+            box-shadow: 0 4px 20px rgba(220, 53, 69, 0.4);
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-panel">
+        <h2>Panel Operativo</h2>
+        <p>Viajes Asignados</p>
+    </div>
+
+    <!-- Bucle Jinja2: Itera sobre el arreglo inyectado desde Flask -->
+    <!-- ¿Por qué y para qué?: Genera HTML dinámico; si hay 5 viajes en PostgreSQL, renderizará 5 tarjetas automáticamente. -->
+    {% if viajes %}
+        {% for viaje in viajes %}
+        <div class="card-viaje" id="tarjeta-{{ viaje.id_reserva }}">
+            <div class="card-header">
+                <strong>Folio #{{ viaje.id_reserva }}</strong>
+                {% if viaje.estado_reserva == 'Pendiente' %}
+                    <span class="badge-estado estado-pendiente">Pendiente</span>
+                {% else %}
+                    <span class="badge-estado estado-progreso">En Progreso</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <p><i class="fas fa-user"></i> {{ viaje.nombre_completo }} ({{ viaje.numero_pasajeros }} Pax)</p>
+                <!-- Botón nativo de llamada móvil -->
+                <p><i class="fas fa-phone"></i> <a href="tel:{{ viaje.telefono }}" style="color: #fff; text-decoration: none;">{{ viaje.telefono }}</a></p>
+                <p><i class="fas fa-clock"></i> {{ viaje.fecha_hora_servicio }}</p>
+                <p><i class="fas fa-map-marker-alt"></i> {{ viaje.origen }} <i class="fas fa-arrow-right" style="font-size: 10px; margin: 0 5px;"></i> {{ viaje.destino }}</p>
+            </div>
+            
+            <div class="card-actions">
+                {% if viaje.estado_reserva == 'Pendiente' %}
+                    <!-- Trigger HTTP hacia Flask (/admin/iniciar_viaje) -->
+                    <button class="btn-accion btn-iniciar" onclick="actualizarEstado({{ viaje.id_reserva }}, 'iniciar')">Iniciar Servicio</button>
+                {% elif viaje.estado_reserva == 'En_Progreso' %}
+                    <!-- Trigger HTTP hacia Flask (/admin/viaje/estado) -->
+                    <button class="btn-accion btn-finalizar" onclick="actualizarEstado({{ viaje.id_reserva }}, 'finalizar')">Finalizar</button>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="card-viaje" style="text-align: center;">
+            <p>No hay viajes pendientes por el momento.</p>
+        </div>
+    {% endif %}
+
+    <!-- Botón de Cierre Diario: Interceptado por tu archivo static/admin.js -->
+    <button id="btn-finalizar-dia" class="btn-flotante-cierre">
+        <i class="fas fa-file-pdf"></i> Generar Cierre del Día
+    </button>
+
+    <!-- Archivo JS de telemetría y descargas -->
+    <script src="{{ url_for('static', filename='admin.js') }}"></script>
+    
+    <script>
+        // Función asíncrona para la Máquina de Estados Operativa.
+        // ¿Por qué y para qué?: Modifica el estado del viaje en la base de datos sin recargar la pantalla, mejorando la fluidez en zonas de baja cobertura celular.
+        async function actualizarEstado(idReserva, accion) {
+            const url = accion === 'iniciar' ? `/admin/iniciar_viaje/${idReserva}` : `/admin/viaje/${idReserva}/estado`;
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accion: accion })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Recarga suave para mostrar la UI actualizada (Botón Verde de Finalizar o desaparecer la tarjeta).
+                    window.location.reload();
+                } else {
+                    alert(data.mensaje || 'Error al actualizar el estado.');
+                }
+            } catch (error) {
+                alert('Fallo de conexión. Verifica tus datos móviles.');
+            }
+        }
+    </script>
+</body>
+</html>

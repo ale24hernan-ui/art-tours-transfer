@@ -83,9 +83,45 @@ def login():
 
 @app.route('/admin')
 def panel_admin():
+    # Barrera de seguridad: Expulsa a quien no tenga la cookie firmada.
+    # ¿Por qué y para qué?: Protege los datos sensibles de tus clientes y las finanzas del negocio.
     if not session.get('admin_logeado'):
         return redirect(url_for('login'))
-    return render_template('admin.html')
+        
+    conn = None
+    cursor = None
+    viajes = []
+    
+    try:
+        conn = obtener_conexion_db()
+        cursor = conn.cursor()
+        
+        # Consulta SQL Relacional (JOIN).
+        # ¿Por qué y para qué?: Unimos 'reservas' (datos operativos) con 'clientes' (nombre y teléfono) para mostrar una tarjeta (Card) completa al chofer, filtrando solo lo que debe atender hoy.
+        cursor.execute("""
+            SELECT r.id_reserva, c.nombre_completo, c.telefono, 
+                   r.origen, r.destino, r.fecha_hora_servicio, 
+                   r.numero_pasajeros, r.estado_reserva
+            FROM reservas r
+            JOIN clientes c ON r.id_cliente = c.id_cliente
+            WHERE r.estado_reserva IN ('Pendiente', 'En_Progreso')
+            ORDER BY r.fecha_hora_servicio ASC
+        """)
+        
+        # Mapeo dinámico de columnas a diccionario.
+        # ¿Por qué y para qué?: Convierte la tupla cruda de PostgreSQL en un diccionario de Python, permitiendo a Jinja2 acceder a los datos usando nombres legibles como viaje['origen'].
+        columnas = [desc[0] for desc in cursor.description]
+        viajes = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+        
+    except Exception as e:
+        print(f"Error de base de datos en Panel Admin: {e}")
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+        
+    # Inyección del arreglo 'viajes' hacia el motor de plantillas.
+    # ¿Por qué y para qué?: Entrega los datos procesados al HTML para que Jinja2 construya las tarjetas de forma dinámica mediante un bucle 'for'.
+    return render_template('admin.html', viajes=viajes)
 
 @app.route('/admin/viaje/<int:id_reserva>/estado', methods=['POST'])
 def actualizar_estado_viaje(id_reserva):
