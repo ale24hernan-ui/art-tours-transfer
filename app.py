@@ -231,18 +231,21 @@ def finalizar_viaje_con_edicion(id_reserva):
         if conn: conn.close()
 
 # ========================================================
-# ENDPOINT: Generación de Corte de Caja en PDF
+# ENDPOINT: Generación de Corte de Caja en PDF (Frontera Horaria)
 # ========================================================
 @app.route('/admin/cierre_diario', methods=['POST'])
 def cierre_diario():
+    # Inicializamos variables de conexión en nulo.
+    # ¿Por qué y para qué?: Previene fugas de memoria y errores de referencia si el clúster de Render rechaza la conexión inicial.
     conn = None
     cursor = None
     try:
         conn = obtener_conexion_db()
         cursor = conn.cursor()
         
-        # 1. Cierre forzoso transaccional basado en hora de INICIO
-        # ¿Por qué y para qué?: Respeta tu regla de Frontera Horaria. Si el viaje empezó a las 23:55 de hoy, le pertenece contablemente al día de hoy, aunque se cierre a las 00:15 de mañana.
+        # 1. Sello Transaccional por Frontera Horaria (UPDATE)
+        # ¿Por qué?: Cambiamos el filtro 'DATE(fecha_hora_servicio)' por 'DATE(hora_inicio_real AT TIME ZONE 'America/Cancun')'.
+        # ¿Para qué?: Garantiza que si el operador olvidó cerrar un viaje en la app, el sistema forzará su cierre adjudicando el dinero al día exacto en que físicamente arrancó la Van.
         cursor.execute("""
             UPDATE reservas 
             SET estado_reserva = 'Finalizado', hora_fin_real = NOW() AT TIME ZONE 'America/Cancun'
@@ -250,8 +253,9 @@ def cierre_diario():
               AND DATE(hora_inicio_real AT TIME ZONE 'America/Cancun') = CURRENT_DATE
         """)
         
-        # 2. Extracción de los datos operativos filtrados por hora de inicio
-        # ¿Por qué y para qué?: Obtiene las finanzas y métricas estrictamente de los servicios iniciados en el día en curso.
+        # 2. Extracción Financiera (SELECT)
+        # ¿Por qué?: Mantenemos la lógica de 'hora_inicio_real' y extraemos 'precio'.
+        # ¿Para qué?: Traemos a la RAM de Python únicamente los viajes rentabilizados hoy, aislando el capital de la medianoche.
         cursor.execute("""
             SELECT id_reserva, 
                    TO_CHAR(hora_inicio_real, 'HH24:MI'), 
@@ -262,23 +266,31 @@ def cierre_diario():
               AND DATE(hora_inicio_real AT TIME ZONE 'America/Cancun') = CURRENT_DATE
         """)
         
+        # Volcado de datos a la memoria de Flask.
         viajes_hoy = cursor.fetchall()
         conn.commit()
 
-        # 3. Inicialización del motor FPDF
+        # 3. Inicialización del Motor FPDF
+        # ¿Por qué?: Orientación 'P' (Portrait) en tamaño Carta (Letter).
+        # ¿Para qué?: Optimizar la lectura del PDF en pantallas verticales de smartphones, evitando que el dueño deba hacer zoom lateral.
         pdf = FPDF('P', 'mm', 'Letter')
         pdf.add_page()
         
         pdf.set_font('Arial', 'B', 16)
         pdf.cell(190, 10, 'CORTE DE CAJA DIARIO - ART-TOURS', ln=1, align='C')
         
+        # Sincronización estricta del reloj local.
+        # ¿Por qué?: ZoneInfo fuerza a Python a ignorar el reloj UTC del servidor en la nube.
+        # ¿Para qué?: El PDF se titulará siempre con la fecha real de Quintana Roo.
         fecha_actual_cancun = datetime.now(ZoneInfo('America/Cancun')).strftime("%Y-%m-%d")
         
         pdf.set_font('Arial', 'I', 10)
         pdf.cell(190, 10, f'Fecha de Operacion: {fecha_actual_cancun}', ln=1, align='C')
         pdf.ln(5)
         
-        # 4. Construcción de los encabezados de la tabla
+        # 4. Renderizado Estructural de la Tabla
+        # ¿Por qué?: Arreglos de strings y enteros para columnas.
+        # ¿Para qué?: Controlar matemáticamente los 190mm de ancho disponible en la hoja Carta.
         pdf.set_font('Arial', 'B', 9)
         headers = ['Folio', 'Inicio', 'Fin', 'Ruta (Origen - Destino)', 'Ingreso']
         anchos = [15, 15, 15, 115, 30]
@@ -287,14 +299,23 @@ def cierre_diario():
             pdf.cell(anchos[i], 8, h, 1, 0, 'C')
         pdf.ln()
 
-        # 5. Volcado de Datos y Agregación Matemática
+        # 5. Agregación Matemática y Volcado de Filas
         pdf.set_font('Arial', '', 8)
+        
+        # Acumulador financiero en RAM.
+        # ¿Por qué?: Variable float inicializada en 0.0.
+        # ¿Para qué?: Calcular el total de MXN recaudado iterando una sola vez los registros, sin requerir una consulta SQL COUNT/SUM adicional.
         total_ingresos_mxn = 0.0
 
         for fila in viajes_hoy:
             folio, hr_inicio, hr_fin, origen, destino, precio = fila
             
+            # ¿Por qué?: String slicing '[:60]'.
+            # ¿Para qué?: Prevenir que un nombre de hotel excesivamente largo rompa la celda de FPDF e invada la columna de 'Ingreso'.
             ruta = f"{origen} a {destino}"[:60]
+            
+            # ¿Por qué?: Casteo defensivo a float.
+            # ¿Para qué?: Previene excepciones matemáticas si PostgreSQL devolvió un valor nulo.
             precio_val = float(precio) if precio is not None else 0.0
             total_ingresos_mxn += precio_val
             
@@ -302,20 +323,26 @@ def cierre_diario():
             pdf.cell(anchos[1], 8, str(hr_inicio or 'N/A'), 1, 0, 'C')
             pdf.cell(anchos[2], 8, str(hr_fin or 'N/A'), 1, 0, 'C')
             pdf.cell(anchos[3], 8, ruta, 1, 0, 'L')
+            
+            # ¿Por qué?: Interpolación de strings con formato ':,.2f'.
+            # ¿Para qué?: Mostrar el ingreso unitario estrictamente en moneda (ej. $1,500.00 MXN).
             pdf.cell(anchos[4], 8, f'${precio_val:,.2f} MXN', 1, 0, 'R')
             pdf.ln()
 
-        # 6. Renderizado del Footer Financiero
+        # 6. Resumen Financiero del Día
         pdf.ln(5)
         pdf.set_font('Arial', 'B', 12)
         pdf.cell(160, 10, 'TOTAL INGRESOS DEL DIA:', 0, 0, 'R')
         pdf.cell(30, 10, f'${total_ingresos_mxn:,.2f} MXN', 0, 1, 'R')
         
-        # 7. Serialización binaria (Arquitectura RAM)
+        # 7. Serialización Binaria (Blobs)
+        # ¿Por qué?: Manejo de archivos virtuales con io.BytesIO().
+        # ¿Para qué?: Mantener la arquitectura "Stateless"; evitamos escribir el PDF en el disco duro de Render, operando todo fluidamente en la memoria RAM del servidor.
         salida_pdf = io.BytesIO()
         salida_pdf.write(pdf.output(dest='S').encode('latin1'))
         salida_pdf.seek(0)
         
+        # Preparación para Webhooks (n8n Fase 3)
         pdf_b64 = base64.b64encode(salida_pdf.getvalue()).decode('utf-8')
         webhook_url = os.environ.get("N8N_WEBHOOK_URL_CIERRE")
         
@@ -339,6 +366,9 @@ def cierre_diario():
             pass
         
         salida_pdf.seek(0)
+        
+        # ¿Por qué?: Directiva HTTP 'as_attachment=True'.
+        # ¿Para qué?: Forzar al navegador del usuario (Safari/Chrome móvil) a abrir el cuadro de diálogo de descarga nativo del OS.
         return send_file(
             salida_pdf, 
             as_attachment=True, 
@@ -352,7 +382,6 @@ def cierre_diario():
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
-
 def requerir_api_key(f):
     @wraps(f)
     def decorador(*args, **kwargs):
