@@ -8,7 +8,7 @@ import urllib.error
 from functools import wraps
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-from flask import Flask, render_template, request, session, redirect, url_for, send_file, jsonify
+from flask import Flask, render_template, request, session, redirect, url_for, send_file, jsonify, flash
 from fpdf import FPDF
 from db import obtener_conexion_db
 
@@ -69,13 +69,11 @@ def reservar():
 def login():
     if request.method == 'POST':
         password_ingresada = request.form.get('password')
-        # Validamos contra tu archivo .env
         if password_ingresada == os.environ.get("ADMIN_PASSWORD"):
             session['admin_logeado'] = True
             session['id_chofer'] = 1 
             return redirect(url_for('panel_admin'))
         else:
-            # En lugar de devolver un string crudo con error 401, enviamos un mensaje a la UI
             flash("Contraseña incorrecta. Intente de nuevo.")
             return render_template('login.html')
             
@@ -83,8 +81,6 @@ def login():
 
 @app.route('/admin')
 def panel_admin():
-    # Barrera de seguridad: Expulsa a quien no tenga la cookie firmada.
-    # ¿Por qué y para qué?: Protege los datos sensibles de tus clientes y las finanzas del negocio.
     if not session.get('admin_logeado'):
         return redirect(url_for('login'))
         
@@ -96,20 +92,18 @@ def panel_admin():
         conn = obtener_conexion_db()
         cursor = conn.cursor()
         
-        # Consulta SQL Relacional (JOIN).
-        # ¿Por qué y para qué?: Unimos 'reservas' (datos operativos) con 'clientes' (nombre y teléfono) para mostrar una tarjeta (Card) completa al chofer, filtrando solo lo que debe atender hoy.
+        # ¿Por qué?: Se incluyó r.precio explícitamente en el SELECT.
+        # ¿Para qué?: Permite al frontend HTML (Jinja2) pre-llenar el modal si el viaje ya tenía un costo pactado.
         cursor.execute("""
             SELECT r.id_reserva, c.nombre_completo, c.telefono, 
                    r.origen, r.destino, r.fecha_hora_servicio, 
-                   r.numero_pasajeros, r.estado_reserva
+                   r.numero_pasajeros, r.estado_reserva, r.precio
             FROM reservas r
             JOIN clientes c ON r.id_cliente = c.id_cliente
             WHERE r.estado_reserva IN ('Pendiente', 'En_Progreso')
             ORDER BY r.fecha_hora_servicio ASC
         """)
         
-        # Mapeo dinámico de columnas a diccionario.
-        # ¿Por qué y para qué?: Convierte la tupla cruda de PostgreSQL en un diccionario de Python, permitiendo a Jinja2 acceder a los datos usando nombres legibles como viaje['origen'].
         columnas = [desc[0] for desc in cursor.description]
         viajes = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
         
@@ -119,8 +113,6 @@ def panel_admin():
         if cursor: cursor.close()
         if conn: conn.close()
         
-    # Inyección del arreglo 'viajes' hacia el motor de plantillas.
-    # ¿Por qué y para qué?: Entrega los datos procesados al HTML para que Jinja2 construya las tarjetas de forma dinámica mediante un bucle 'for'.
     return render_template('admin.html', viajes=viajes)
 
 @app.route('/admin/viaje/<int:id_reserva>/estado', methods=['POST'])
@@ -200,6 +192,47 @@ def iniciar_viaje_seguro(id_reserva):
         if cursor: cursor.close()
         if conn: conn.close()
 
+# ========================================================
+# ENDPOINT: Cierre Operativo y Contable (Cobro en MXN)
+# ========================================================
+@app.route('/admin/viaje/<int:id_reserva>/finalizar_edicion', methods=['POST'])
+def finalizar_viaje_con_edicion(id_reserva):
+    datos = request.json
+    origen_nuevo = datos.get('origen')
+    destino_nuevo = datos.get('destino')
+    precio_mxn = datos.get('precio')
+
+    conn = None
+    cursor = None
+    
+    try:
+        conn = obtener_conexion_db()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            UPDATE reservas 
+            SET origen = %s, 
+                destino = %s, 
+                precio = %s,
+                estado_reserva = 'Finalizado', 
+                hora_fin_real = NOW() AT TIME ZONE 'America/Cancun'
+            WHERE id_reserva = %s
+        """, (origen_nuevo, destino_nuevo, precio_mxn, id_reserva))
+        
+        conn.commit()
+        return jsonify({"status": "success", "mensaje": "Viaje cobrado y cerrado con éxito."})
+        
+    except Exception as e:
+        if conn: conn.rollback()
+        return jsonify({"status": "error", "mensaje": str(e)}), 500
+        
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
+
+# ========================================================
+# ENDPOINT: Generación de Corte de Caja en PDF
+# ========================================================
 @app.route('/admin/cierre_diario', methods=['POST'])
 def cierre_diario():
     conn = None
@@ -208,54 +241,88 @@ def cierre_diario():
         conn = obtener_conexion_db()
         cursor = conn.cursor()
         
+        # 1. Cierre forzoso transaccional basado en hora de INICIO
+        # ¿Por qué y para qué?: Respeta tu regla de Frontera Horaria. Si el viaje empezó a las 23:55 de hoy, le pertenece contablemente al día de hoy, aunque se cierre a las 00:15 de mañana.
         cursor.execute("""
             UPDATE reservas 
             SET estado_reserva = 'Finalizado', hora_fin_real = NOW() AT TIME ZONE 'America/Cancun'
-            WHERE estado_reserva = 'En_Progreso' AND DATE(fecha_hora_servicio) = CURRENT_DATE
+            WHERE estado_reserva = 'En_Progreso' 
+              AND DATE(hora_inicio_real AT TIME ZONE 'America/Cancun') = CURRENT_DATE
         """)
         
+        # 2. Extracción de los datos operativos filtrados por hora de inicio
+        # ¿Por qué y para qué?: Obtiene las finanzas y métricas estrictamente de los servicios iniciados en el día en curso.
         cursor.execute("""
-            SELECT TO_CHAR(fecha_hora_servicio, 'YYYY-MM-DD'), 
-                   TO_CHAR(hora_inicio_real, 'HH24:MI'), TO_CHAR(hora_fin_real, 'HH24:MI'), 
-                   origen, destino, hotel_referencia, numero_vuelo, precio
+            SELECT id_reserva, 
+                   TO_CHAR(hora_inicio_real, 'HH24:MI'), 
+                   TO_CHAR(hora_fin_real, 'HH24:MI'), 
+                   origen, destino, precio
             FROM reservas
-            WHERE estado_reserva = 'Finalizado' AND DATE(fecha_hora_servicio) = CURRENT_DATE
+            WHERE estado_reserva = 'Finalizado' 
+              AND DATE(hora_inicio_real AT TIME ZONE 'America/Cancun') = CURRENT_DATE
         """)
+        
         viajes_hoy = cursor.fetchall()
         conn.commit()
 
-        pdf = FPDF('L', 'mm', 'Letter')
+        # 3. Inicialización del motor FPDF
+        pdf = FPDF('P', 'mm', 'Letter')
         pdf.add_page()
-        pdf.set_font('Arial', 'B', 14)
-        pdf.cell(250, 10, 'Reporte Operativo Diario - ART-TOURS TRANSFER', 0, 1, 'C')
+        
+        pdf.set_font('Arial', 'B', 16)
+        pdf.cell(190, 10, 'CORTE DE CAJA DIARIO - ART-TOURS', ln=1, align='C')
+        
+        fecha_actual_cancun = datetime.now(ZoneInfo('America/Cancun')).strftime("%Y-%m-%d")
+        
+        pdf.set_font('Arial', 'I', 10)
+        pdf.cell(190, 10, f'Fecha de Operacion: {fecha_actual_cancun}', ln=1, align='C')
         pdf.ln(5)
         
+        # 4. Construcción de los encabezados de la tabla
         pdf.set_font('Arial', 'B', 9)
-        headers = ['Fecha', 'Inicio', 'Fin', 'Origen', 'Destino', 'Hotel', 'Vuelo', 'Precio']
-        anchos = [25, 15, 15, 45, 45, 60, 25, 20]
+        headers = ['Folio', 'Inicio', 'Fin', 'Ruta (Origen - Destino)', 'Ingreso']
+        anchos = [15, 15, 15, 115, 30]
         
         for i, h in enumerate(headers):
-            pdf.cell(anchos[i], 10, h, 1, 0, 'C')
+            pdf.cell(anchos[i], 8, h, 1, 0, 'C')
         pdf.ln()
 
+        # 5. Volcado de Datos y Agregación Matemática
         pdf.set_font('Arial', '', 8)
+        total_ingresos_mxn = 0.0
+
         for fila in viajes_hoy:
-            for i, dato in enumerate(fila):
-                valor = str(dato) if dato is not None else 'N/A'
-                pdf.cell(anchos[i], 10, valor[:25], 1, 0, 'C')
+            folio, hr_inicio, hr_fin, origen, destino, precio = fila
+            
+            ruta = f"{origen} a {destino}"[:60]
+            precio_val = float(precio) if precio is not None else 0.0
+            total_ingresos_mxn += precio_val
+            
+            pdf.cell(anchos[0], 8, str(folio), 1, 0, 'C')
+            pdf.cell(anchos[1], 8, str(hr_inicio or 'N/A'), 1, 0, 'C')
+            pdf.cell(anchos[2], 8, str(hr_fin or 'N/A'), 1, 0, 'C')
+            pdf.cell(anchos[3], 8, ruta, 1, 0, 'L')
+            pdf.cell(anchos[4], 8, f'${precio_val:,.2f} MXN', 1, 0, 'R')
             pdf.ln()
+
+        # 6. Renderizado del Footer Financiero
+        pdf.ln(5)
+        pdf.set_font('Arial', 'B', 12)
+        pdf.cell(160, 10, 'TOTAL INGRESOS DEL DIA:', 0, 0, 'R')
+        pdf.cell(30, 10, f'${total_ingresos_mxn:,.2f} MXN', 0, 1, 'R')
         
+        # 7. Serialización binaria (Arquitectura RAM)
         salida_pdf = io.BytesIO()
         salida_pdf.write(pdf.output(dest='S').encode('latin1'))
         salida_pdf.seek(0)
         
         pdf_b64 = base64.b64encode(salida_pdf.getvalue()).decode('utf-8')
         webhook_url = os.environ.get("N8N_WEBHOOK_URL_CIERRE")
-        fecha_actual_cancun = datetime.now(ZoneInfo('America/Cancun')).strftime("%Y-%m-%d")
         
         payload_n8n = {
             "fecha_cierre": fecha_actual_cancun,
             "total_viajes": len(viajes_hoy),
+            "ingreso_total_mxn": total_ingresos_mxn,
             "archivo_pdf_b64": pdf_b64
         }
         
@@ -272,7 +339,12 @@ def cierre_diario():
             pass
         
         salida_pdf.seek(0)
-        return send_file(salida_pdf, as_attachment=True, download_name=f'Reporte_Diario_{fecha_actual_cancun}.pdf', mimetype='application/pdf')
+        return send_file(
+            salida_pdf, 
+            as_attachment=True, 
+            download_name=f'Corte_Caja_{fecha_actual_cancun}.pdf', 
+            mimetype='application/pdf'
+        )
         
     except Exception as e:
         if conn: conn.rollback()

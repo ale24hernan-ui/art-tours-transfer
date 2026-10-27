@@ -105,6 +105,28 @@
             box-shadow: 0 4px 20px rgba(220, 53, 69, 0.4);
             z-index: 1000;
         }
+        
+        /* ¿Por qué?: Posicionamiento absoluto z-index 2000. */
+        /* ¿Para qué?: Sobreponerse al botón rojo flotante de Cierre Diario para evitar toques accidentales. */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px);
+            display: flex; justify-content: center; align-items: center; z-index: 2000;
+        }
+
+        /* ¿Por qué?: Reutilización de variables CSS corporativas. */
+        /* ¿Para qué?: Extender el diseño Glassmorphism a la ventana de cobro asegurando continuidad visual. */
+        .modal-content {
+            background: var(--color-tarjeta); border: 1px solid var(--color-borde);
+            border-radius: 15px; padding: 20px; width: 90%; max-width: 400px;
+        }
+
+        /* ¿Por qué?: Padding expansivo y borde sutil. */
+        /* ¿Para qué?: Crear áreas táctiles (Hitboxes) holgadas para la operación con pulgares. */
+        .input-modal {
+            width: 100%; padding: 12px; margin-top: 5px; border-radius: 8px; box-sizing: border-box;
+            border: 1px solid var(--color-borde); background: rgba(255,255,255,0.1); color: #fff; font-size: 16px;
+        }
     </style>
 </head>
 <body>
@@ -140,8 +162,8 @@
                     <!-- Trigger HTTP hacia Flask (/admin/iniciar_viaje) -->
                     <button class="btn-accion btn-iniciar" onclick="actualizarEstado({{ viaje.id_reserva }}, 'iniciar')">Iniciar Servicio</button>
                 {% elif viaje.estado_reserva == 'En_Progreso' %}
-                    <!-- Trigger HTTP hacia Flask (/admin/viaje/estado) -->
-                    <button class="btn-accion btn-finalizar" onclick="actualizarEstado({{ viaje.id_reserva }}, 'finalizar')">Finalizar</button>
+                    <!-- REEMPLAZO ACTIVO: El botón ahora dispara el modal inyectando los datos de este viaje en particular -->
+                    <button class="btn-accion btn-finalizar" onclick="abrirModalEdicion({{ viaje.id_reserva }}, '{{ viaje.origen }}', '{{ viaje.destino }}', '{{ viaje.precio }}')">Finalizar y Cobrar</button>
                 {% endif %}
             </div>
         </div>
@@ -157,12 +179,45 @@
         <i class="fas fa-file-pdf"></i> Generar Cierre del Día
     </button>
 
-    <!-- Archivo JS de telemetría y descargas -->
+    <!-- ======================================================== -->
+    <!-- MODAL DE EDICIÓN Y COBRO (¡Importante: Fuera del Bucle Jinja2!) -->
+    <!-- ======================================================== -->
+    <!-- ¿Por qué?: Se extrajo del bucle {% for %}. -->
+    <!-- ¿Para qué?: Prevenir que el HTML colapse creando 10 modales invisibles idénticos si tienes 10 viajes en progreso. -->
+    <div id="modal-edicion" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h3 style="color: var(--color-principal); margin-top:0;">Cobrar Viaje #<span id="modal-folio"></span></h3>
+            
+            <input type="hidden" id="modal-id-reserva">
+            
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="font-size: 14px; font-weight: 600;">Origen Real:</label>
+                <input type="text" id="modal-origen" class="input-modal">
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="font-size: 14px; font-weight: 600;">Destino Real:</label>
+                <input type="text" id="modal-destino" class="input-modal">
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label style="font-size: 14px; font-weight: 600; color: #28a745;">Precio Final (MXN):</label>
+                <input type="number" id="modal-precio" class="input-modal" placeholder="0.00" step="0.01" required>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-accion" style="background: #555; color: white;" onclick="cerrarModalEdicion()">Cancelar</button>
+                <button class="btn-accion btn-finalizar" onclick="guardarEdicionYFinalizar()">Cerrar y Cobrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Archivo JS externo de telemetría y descargas -->
     <script src="{{ url_for('static', filename='admin.js') }}"></script>
     
+    <!-- Scripts Internos del Panel -->
     <script>
         // Función asíncrona para la Máquina de Estados Operativa.
-        // ¿Por qué y para qué?: Modifica el estado del viaje en la base de datos sin recargar la pantalla, mejorando la fluidez en zonas de baja cobertura celular.
         async function actualizarEstado(idReserva, accion) {
             const url = accion === 'iniciar' ? `/admin/iniciar_viaje/${idReserva}` : `/admin/viaje/${idReserva}/estado`;
             
@@ -176,7 +231,6 @@
                 const data = await response.json();
                 
                 if (response.ok) {
-                    // Recarga suave para mostrar la UI actualizada (Botón Verde de Finalizar o desaparecer la tarjeta).
                     window.location.reload();
                 } else {
                     alert(data.mensaje || 'Error al actualizar el estado.');
@@ -185,6 +239,64 @@
                 alert('Fallo de conexión. Verifica tus datos móviles.');
             }
         }
+
+        // ¿Por qué?: Función síncrona de inyección DOM.
+        function abrirModalEdicion(idReserva, origen, destino, precioActual) {
+            document.getElementById('modal-id-reserva').value = idReserva;
+            document.getElementById('modal-folio').innerText = idReserva;
+            document.getElementById('modal-origen').value = origen;
+            document.getElementById('modal-destino').value = destino;
+            
+            document.getElementById('modal-precio').value = (precioActual && precioActual !== 'None') ? precioActual : '';
+            document.getElementById('modal-edicion').style.display = 'flex';
+        }
+
+        function cerrarModalEdicion() {
+            document.getElementById('modal-edicion').style.display = 'none';
+        }
+
+        // ¿Por qué?: Promesa asíncrona que envía los datos financieros a Flask.
+        async function guardarEdicionYFinalizar() {
+            const idReserva = document.getElementById('modal-id-reserva').value;
+            const origen = document.getElementById('modal-origen').value;
+            const destino = document.getElementById('modal-destino').value;
+            const precio = document.getElementById('modal-precio').value;
+
+            // Validación estricta en el Frontend
+            if (!precio || precio === "") {
+                alert("Acción Requerida: Ingresa el Precio Final en MXN para cerrar el viaje.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`/admin/viaje/${idReserva}/finalizar_edicion`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        origen: origen, 
+                        destino: destino, 
+                        precio: parseFloat(precio) 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert(data.mensaje || 'Error al actualizar y finalizar el viaje.');
+                }
+            } catch (error) {
+                alert('Fallo de conexión. Verifica tus datos móviles e intenta de nuevo.');
+            }
+        }
     </script>
 </body>
 </html>
+@app.route('/api/v1/automatizacion/reporte-semanal', methods=['POST'])
+@requerir_api_key
+def trigger_reporte_semanal():
+    return jsonify({"status": "success", "mensaje": "Endpoint reservado."}), 200
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
