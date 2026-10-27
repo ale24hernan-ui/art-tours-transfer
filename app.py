@@ -249,9 +249,7 @@ def cierre_diario():
               AND hora_inicio_real::DATE = (NOW() AT TIME ZONE 'America/Cancun')::DATE
         """)
         
-        # 2. Extracción Financiera y Operativa (Ampliación a 10 Columnas)
-        # ¿Por qué?: Se extraen todos los campos visuales de tu plantilla Excel y se calcula el tiempo transcurrido en el motor SQL (EPOCH).
-        # ¿Para qué?: Descargar a Python del procesamiento de fechas y centralizar la lógica de negocio en la consulta.
+        # 2. Extracción Financiera y Operativa
         cursor.execute("""
             SELECT TO_CHAR(hora_inicio_real, 'YYYY-MM-DD') as fecha,
                    TO_CHAR(hora_inicio_real, 'HH24:MI') as hr_inicio, 
@@ -272,15 +270,17 @@ def cierre_diario():
         conn.commit()
 
         # 3. Inicialización del Motor FPDF (Landscape / Horizontal)
-        # ¿Por qué y para qué?: 'L' invierte el eje para darnos ~260mm de ancho útil, esencial para desplegar 10 columnas corporativas sin que se rompa la tabla.
         pdf = FPDF('L', 'mm', 'Letter')
         pdf.add_page()
         
-        # Inserción de Logotipo
-        # ¿Por qué?: Os.path localiza el logo dinámicamente tanto en tu Windows como en el contenedor Linux de Render.
+        # Inserción de Logotipo y Espaciado de Seguridad
         ruta_logo = os.path.join(app.root_path, 'static', 'images', 'logo-transfers.png')
         if os.path.exists(ruta_logo):
+            # ¿Por qué y para qué?: La imagen flota en las coordenadas X:10, Y:8.
             pdf.image(ruta_logo, x=10, y=8, w=35)
+            
+        # ¿Por qué y para qué?: Empujamos el cursor principal de texto 15 milímetros hacia abajo para despejar totalmente la hitbox del logotipo.
+        pdf.ln(15) 
         
         # Título y Subtítulo Central
         pdf.set_font('Arial', 'B', 14)
@@ -292,31 +292,26 @@ def cierre_diario():
         pdf.cell(0, 6, f'PERIODO: {fecha_actual_cancun}', ln=1, align='C')
         pdf.ln(8)
         
-        # 4. Construcción de Encabezados (Estilo UI Corporativo)
-        # ¿Por qué?: Se aplican los códigos RGB de tu plantilla (Fondo azul oscuro, texto blanco).
+        # 4. Construcción de Encabezados
         pdf.set_fill_color(31, 73, 125) 
         pdf.set_text_color(255, 255, 255) 
         pdf.set_font('Arial', 'B', 8)
         
         headers = ['Fecha', 'Hora Inicio', 'Hora Fin', 'Tiempo Total', 'Lugar Inicio', 'Lugar Destino', 'Hotel', 'Folio', 'Cupón', 'Precio']
-        # Ajuste milimétrico de anchos para sumar exactamente 254mm (encaja perfecto con los márgenes de FPDF)
         anchos = [22, 22, 18, 24, 33, 33, 40, 15, 22, 25]
         
         for i, h in enumerate(headers):
-            # fill=True activa el renderizado del color de fondo azul
             pdf.cell(anchos[i], 8, h.encode('latin-1', 'replace').decode('latin-1'), 1, 0, 'C', fill=True)
         pdf.ln()
 
         # 5. Volcado de Datos y Agregación Matemática
-        pdf.set_text_color(0, 0, 0) # Restaurar color de texto a negro para los datos
+        pdf.set_text_color(0, 0, 0)
         pdf.set_font('Arial', '', 8)
         total_ingresos_mxn = 0.0
 
         for fila in viajes_hoy:
             fecha_str, hr_inicio, hr_fin, tiempo_seg, origen, destino, hotel, folio, cupon, precio = fila
             
-            # Formateo de Tiempo Total
-            # ¿Por qué?: Se realiza un divmod manual de los segundos extraídos del EPOCH SQL para obtener formato humano.
             if tiempo_seg is not None:
                 horas = int(tiempo_seg // 3600)
                 minutos = int((tiempo_seg % 3600) // 60)
@@ -324,8 +319,6 @@ def cierre_diario():
             else:
                 tiempo_str = "N/A"
 
-            # Truncado Responsivo (Defensa Unicode)
-            # ¿Por qué?: Garantiza que textos como nombres de hoteles gigantescos no desborden su celda, e inmuniza contra emojis.
             def limpiar_celda(texto, max_len):
                 if not texto: return 'N/A'
                 return str(texto)[:max_len].encode('latin-1', 'replace').decode('latin-1')
@@ -338,7 +331,6 @@ def cierre_diario():
             precio_val = float(precio) if precio is not None else 0.0
             total_ingresos_mxn += precio_val
             
-            # Impresión de la fila
             pdf.cell(anchos[0], 8, str(fecha_str or 'N/A'), 1, 0, 'C')
             pdf.cell(anchos[1], 8, str(hr_inicio or 'N/A'), 1, 0, 'C')
             pdf.cell(anchos[2], 8, str(hr_fin or 'N/A'), 1, 0, 'C')
@@ -351,13 +343,16 @@ def cierre_diario():
             pdf.cell(anchos[9], 8, f'${precio_val:,.2f}', 1, 0, 'R')
             pdf.ln()
 
-        # 6. Resumen Financiero Ejecutivo
-        pdf.ln(5)
+        # 6. Resumen Financiero Ejecutivo (Espaciado Corregido)
+        # ¿Por qué y para qué?: Duplicamos el salto de línea (de ln 5 a ln 10) para separar limpiamente el footer contable de la última fila de datos.
+        pdf.ln(10)
         pdf.set_font('Arial', 'B', 11)
         ancho_previo = sum(anchos[:-1])
-        pdf.cell(ancho_previo, 10, 'INGRESO TOTAL DEL PERIODO:', 0, 0, 'R')
-        pdf.set_text_color(31, 73, 125) # Azul corporativo para la métrica en MXN
-        pdf.cell(anchos[-1], 10, f'${total_ingresos_mxn:,.2f} MXN', 0, 1, 'R')
+        
+        # ¿Por qué y para qué?: Le restamos 5mm al borde derecho de la frase de Ingreso, y le sumamos esos 5mm de área libre a la celda del monto. Así creamos una barrera (padding) irrompible.
+        pdf.cell(ancho_previo - 5, 10, 'INGRESO TOTAL DEL PERIODO:', 0, 0, 'R')
+        pdf.set_text_color(31, 73, 125) 
+        pdf.cell(anchos[-1] + 5, 10, f'${total_ingresos_mxn:,.2f} MXN', 0, 1, 'R')
         
         # 7. Serialización Binaria (Blobs en RAM)
         salida_pdf = io.BytesIO()
