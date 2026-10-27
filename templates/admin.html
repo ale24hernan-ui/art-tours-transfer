@@ -216,47 +216,29 @@
     <!-- SCRIPTS INTERNOS DEL PANEL (Lógica y Telemetría PDF)     -->
     <!-- ======================================================== -->
     <script>
-        // --------------------------------------------------------
-        // MOTOR DE ESTADOS OPERATIVOS
-        // --------------------------------------------------------
         async function actualizarEstado(idReserva, accion) {
             const url = accion === 'iniciar' ? `/admin/iniciar_viaje/${idReserva}` : `/admin/viaje/${idReserva}/estado`;
-            
             try {
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ accion: accion })
                 });
-                
                 const data = await response.json();
-                
-                if (response.ok) {
-                    window.location.reload();
-                } else {
-                    alert(data.mensaje || 'Error al actualizar el estado.');
-                }
-            } catch (error) {
-                alert('Fallo de conexión. Verifica tus datos móviles.');
-            }
+                if (response.ok) { window.location.reload(); } else { alert(data.mensaje || 'Error al actualizar el estado.'); }
+            } catch (error) { alert('Fallo de conexión. Verifica tus datos móviles.'); }
         }
 
-        // --------------------------------------------------------
-        // CONTROLADORES DEL MODAL DE COBRO
-        // --------------------------------------------------------
         function abrirModalEdicion(idReserva, origen, destino, precioActual) {
             document.getElementById('modal-id-reserva').value = idReserva;
             document.getElementById('modal-folio').innerText = idReserva;
             document.getElementById('modal-origen').value = origen;
             document.getElementById('modal-destino').value = destino;
-            
             document.getElementById('modal-precio').value = (precioActual && precioActual !== 'None') ? precioActual : '';
             document.getElementById('modal-edicion').style.display = 'flex';
         }
 
-        function cerrarModalEdicion() {
-            document.getElementById('modal-edicion').style.display = 'none';
-        }
+        function cerrarModalEdicion() { document.getElementById('modal-edicion').style.display = 'none'; }
 
         async function guardarEdicionYFinalizar() {
             const idReserva = document.getElementById('modal-id-reserva').value;
@@ -273,35 +255,21 @@
                 const response = await fetch(`/admin/viaje/${idReserva}/finalizar_edicion`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        origen: origen, 
-                        destino: destino, 
-                        precio: parseFloat(precio) 
-                    })
+                    body: JSON.stringify({ origen: origen, destino: destino, precio: parseFloat(precio) })
                 });
-                
                 const data = await response.json();
-                
-                if (response.ok) {
-                    window.location.reload();
-                } else {
-                    alert(data.mensaje || 'Error al actualizar y finalizar el viaje.');
-                }
-            } catch (error) {
-                alert('Fallo de conexión. Verifica tus datos móviles e intenta de nuevo.');
-            }
+                if (response.ok) { window.location.reload(); } else { alert(data.mensaje || 'Error al finalizar el viaje.'); }
+            } catch (error) { alert('Fallo de conexión. Verifica tus datos móviles.'); }
         }
 
         // --------------------------------------------------------
-        // MOTOR GENERADOR DE REPORTES Y DESCARGA (PDF / BLOB)
+        // MOTOR GENERADOR DE REPORTES (MODIFICADO PARA DEPURACIÓN EXTREMA)
         // --------------------------------------------------------
-        // ¿Por qué?: Se envuelve en DOMContentLoaded para garantizar que el botón ya exista en la pantalla antes de asignarle funciones.
         document.addEventListener('DOMContentLoaded', () => {
             const btnFinalizar = document.getElementById('btn-finalizar-dia');
 
             if (btnFinalizar) {
                 btnFinalizar.addEventListener('click', async () => {
-                    // Bloqueo temporal para evitar multi-clics que saturen el servidor.
                     btnFinalizar.disabled = true;
                     btnFinalizar.innerText = 'Generando Reporte...';
 
@@ -311,15 +279,16 @@
                             headers: { 'Content-Type': 'application/json' }
                         });
 
+                        // ¿Por qué?: Interceptamos el 500 antes de intentar descargar un PDF corrupto.
+                        // ¿Para qué?: Para forzar a Flask a escupirnos el error exacto de SQL o FPDF.
                         if (!respuesta.ok) {
-                            throw new Error(`Error HTTP: ${respuesta.status}`);
+                            const errorData = await respuesta.json();
+                            throw new Error(errorData.mensaje || `Error HTTP: ${respuesta.status}`);
                         }
 
-                        // Parseo de los datos binarios desde la RAM de Python hacia JS.
                         const blob = await respuesta.blob();
                         const urlDescarga = window.URL.createObjectURL(blob);
                         
-                        // Creación y ejecución de un enlace virtual de descarga nativo.
                         const enlaceInvisible = document.createElement('a');
                         enlaceInvisible.href = urlDescarga;
                         enlaceInvisible.download = `Corte_ArtTours_${new Date().toISOString().split('T')[0]}.pdf`;
@@ -332,8 +301,9 @@
                         btnFinalizar.innerText = 'Día Finalizado Exitosamente';
                         
                     } catch (error) {
-                        console.error('Fallo operativo en cierre de día:', error);
-                        alert("Ocurrió un error al descargar el PDF. Revisa tu conexión a internet.");
+                        // ¿Por qué?: Ahora la alerta mostrará el mensaje directo de PostgreSQL o Python.
+                        console.error('Fallo operativo:', error);
+                        alert(`Fallo en el servidor: \n${error.message}`);
                         btnFinalizar.innerText = 'Generar Cierre del Día';
                         btnFinalizar.disabled = false;
                     }
