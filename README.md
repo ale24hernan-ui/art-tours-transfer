@@ -1,5 +1,3 @@
-# art-tours-transfer
-Pagina web para servicio de transporte
 # Artours Transfer SaaS - B2B Logistics Automation 🚐
 
 Módulo SaaS transaccional "Mobile-First" desarrollado para la gestión logística de una flotilla de transporte turístico, reemplazando las operaciones basadas en macros de Excel por una arquitectura en la nube segura y escalable.
