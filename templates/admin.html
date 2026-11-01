@@ -127,8 +127,8 @@
         <div class="modal-content">
             <h3 style="color: var(--color-principal); margin-top:0;">Registro Manual</h3>
             
-            <!-- ¿Por qué?: Construimos el elemento datalist e iteramos con Jinja2 el arreglo 'puntos_interes' enviado desde Flask. -->
-            <!-- ¿Para qué?: Crea un autocompletado en el navegador basado estrictamente en tu base de datos, previniendo errores de tipeo. -->
+            <!-- ¿Por qué?: El datalist se pobla dinámicamente desde PostgreSQL. -->
+            <!-- ¿Para qué?: Habilita el autocompletado nativo. Al ser un input de texto, el usuario puede seleccionar la opción de la lista o escribir algo nuevo libremente. -->
             <datalist id="lista-destinos">
                 {% for punto in puntos_interes %}
                     <option value="{{ punto }}"></option>
@@ -137,7 +137,7 @@
 
             <div style="margin-bottom: 10px;">
                 <label style="font-size: 14px; font-weight: 600;">Origen:</label>
-                <!-- ¿Por qué?: El atributo list="lista-destinos" vincula este campo de texto con las opciones del datalist superior. -->
+                <!-- ¿Por qué?: El atributo list="lista-destinos" vincula el input a la lista de arriba. -->
                 <input type="text" id="manual-origen" class="input-modal" list="lista-destinos" required>
             </div>
             
@@ -146,8 +146,30 @@
                 <input type="text" id="manual-destino" class="input-modal" list="lista-destinos" required>
             </div>
 
-            <!-- (El resto de tus campos de pasajeros, fecha, precio y botones se mantienen intactos aquí abajo) -->
+            <div style="margin-bottom: 10px;">
+                <label style="font-size: 14px; font-weight: 600;">Pasajeros:</label>
+                <!-- ¿Por qué?: Recuperamos el input numérico que borraste. -->
+                <input type="number" id="manual-pax" class="input-modal" value="1" min="1" max="40">
+            </div>
 
+            <div style="margin-bottom: 10px;">
+                <label style="font-size: 14px; font-weight: 600;">Fecha y Hora:</label>
+                <!-- ¿Por qué?: Recuperamos el input de calendario nativo. -->
+                <input type="datetime-local" id="manual-fecha" class="input-modal" required>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="font-size: 14px; font-weight: 600; color: #28a745;">Precio (MXN):</label>
+                <!-- ¿Por qué?: Recuperamos el input financiero. -->
+                <input type="number" id="manual-precio" class="input-modal" placeholder="Ej. 1500.00" step="0.01" required>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-accion" style="background: #333; color: white;" onclick="cerrarModal('modal-crear')">Cancelar</button>
+                <button class="btn-accion btn-iniciar" onclick="guardarViajeManual()">Crear Viaje</button>
+            </div>
+        </div>
+    </div>
     <script>
         function cerrarModal(id) { document.getElementById(id).style.display = 'none'; }
         
