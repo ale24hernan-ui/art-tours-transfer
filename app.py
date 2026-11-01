@@ -87,40 +87,42 @@ def panel_admin():
         
     conn = None
     cursor = None
+    viajes = []
+    puntos = [] # ¿Por qué?: Inicializamos la lista vacía para evitar errores de referencia si la BD falla.
+    
     try:
         conn = obtener_conexion_db()
-        # ¿Por qué?: DictCursor transforma las tuplas devueltas en diccionarios.
-        # ¿Para qué?: Para que Jinja2 pueda iterar usando nombres como viaje['origen'] en lugar de índices [3].
-        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cursor = conn.cursor()
         
-        # ¿Por qué?: Restringimos la consulta estrictamente a Hoy y Mañana.
-        # ¿Para qué?: Descongestionamos la RAM y la pantalla del operador, manteniendo el foco en el flujo de caja inmediato.
+        # 1. Extracción de Viajes Activos
         cursor.execute("""
-            SELECT r.*, c.nombre_completo, c.telefono 
+            SELECT r.id_reserva, c.nombre_completo, c.telefono, 
+                   r.origen, r.destino, r.fecha_hora_servicio, 
+                   r.numero_pasajeros, r.estado_reserva, r.precio
             FROM reservas r
-            LEFT JOIN clientes c ON r.id_cliente = c.id_cliente
-            WHERE DATE(r.fecha_hora_servicio) IN (
-                (NOW() AT TIME ZONE 'America/Cancun')::DATE, 
-                (NOW() AT TIME ZONE 'America/Cancun')::DATE + INTERVAL '1 day'
-            )
-            ORDER BY 
-                DATE(r.fecha_hora_servicio) ASC,
-                CASE 
-                    WHEN r.estado_reserva = 'En_Progreso' THEN 1
-                    WHEN r.estado_reserva = 'Pendiente' THEN 2
-                    WHEN r.estado_reserva = 'Finalizado' THEN 3
-                    WHEN r.estado_reserva = 'Cancelado' THEN 4
-                    ELSE 5
-                END ASC,
-                r.fecha_hora_servicio ASC
+            JOIN clientes c ON r.id_cliente = c.id_cliente
+            WHERE r.estado_reserva IN ('Pendiente', 'En_Progreso')
+            ORDER BY r.fecha_hora_servicio ASC
         """)
-        viajes = cursor.fetchall()
-        return render_template('admin.html', viajes=viajes)
+        
+        columnas = [desc[0] for desc in cursor.description]
+        viajes = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+        
+        # 2. NUEVO: Extracción del Catálogo Geográfico
+        # ¿Por qué?: Ejecutamos un SELECT directo a la tabla puntos_interes creada en hitos anteriores.
+        # ¿Para qué?: Para poblar dinámicamente el datalist del formulario manual en admin.html, garantizando que el origen y destino coincidan con el tarifario.
+        cursor.execute("SELECT nombre_destino FROM puntos_interes ORDER BY nombre_destino ASC")
+        puntos = [fila[0] for fila in cursor.fetchall()]
+        
     except Exception as e:
-        return f"Error: {str(e)}", 500
+        print(f"Error de base de datos en Panel Admin: {e}")
     finally:
         if cursor: cursor.close()
         if conn: conn.close()
+        
+    # ¿Por qué?: Pasamos la variable 'puntos_interes' al motor Jinja2.
+    return render_template('admin.html', viajes=viajes, puntos_interes=puntos)
+
 
 @app.route('/admin/viaje/manual', methods=['POST'])
 def crear_viaje_manual():

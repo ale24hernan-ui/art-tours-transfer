@@ -16,7 +16,52 @@ const contenedorPrecio = document.getElementById('contenedor-precio');
 // Buscamos el texto exacto donde inyectaremos el símbolo de dólar y el número.
 const precioTotalTexto = document.getElementById('precio-total');
 
+# (Añadir debajo de tus otras rutas en app.py)
+# ========================================================
+# ENDPOINT API: Cotizador en Vivo (SaaS)
+# ========================================================
+@app.route('/api/v1/cotizar', methods=['POST'])
+def api_cotizar():
+    # ¿Por qué?: Esperamos un POST JSON con origen y destino.
+    # ¿Para qué?: Es más seguro que enviarlo por la URL (GET) y nos permite estructurar un payload claro desde JavaScript.
+    datos = request.json
+    origen = datos.get('origen')
+    destino = datos.get('destino')
+    vehiculo = datos.get('vehiculo', 'Van 8 Pax') # Valor por defecto
 
+    if not origen or not destino:
+        return jsonify({"status": "error", "mensaje": "Falta origen o destino"}), 400
+
+    conn = None
+    cursor = None
+    try:
+        conn = obtener_conexion_db()
+        cursor = conn.cursor()
+
+        # ¿Por qué?: Buscamos la coincidencia exacta en la tabla tarifario.
+        # ¿Para qué?: Si el cliente pone una ruta sin precio, el backend retorna NULL (404 virtual) y el frontend muestra "Cotización Especial".
+        cursor.execute("""
+            SELECT precio_mxn 
+            FROM tarifario 
+            WHERE origen = %s AND destino = %s AND tipo_vehiculo = %s AND activo = TRUE
+        """, (origen, destino, vehiculo))
+        
+        resultado = cursor.fetchone()
+
+        if resultado:
+            return jsonify({
+                "status": "success", 
+                "precio": float(resultado[0]),
+                "moneda": "MXN"
+            })
+        else:
+            return jsonify({"status": "not_found", "precio": None})
+
+    except Exception as e:
+        return jsonify({"status": "error", "mensaje": str(e)}), 500
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
 // =========================================
 // 2. BASES DE DATOS TEMPORALES (DICCIONARIOS)
 // =========================================
