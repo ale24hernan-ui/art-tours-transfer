@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Historial Operativo | ART-TOURS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { --color-principal: #00bfff; --color-fondo: #0a0a0a; --color-tarjeta: rgba(255, 255, 255, 0.05); --color-borde: rgba(255, 255, 255, 0.1); }
+        body { margin: 0; padding: 15px 10px 100px 10px; font-family: 'Montserrat', sans-serif; background-color: var(--color-fondo); color: #fff; }
+        
+        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { flex: 1; padding: 12px; text-align: center; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; transition: 0.2s; }
+        .tab-activa { background: var(--color-principal); color: #000; }
+        .tab-inactiva { background: var(--color-tarjeta); color: #fff; border: 1px solid var(--color-borde); }
+
+        /* Filtro de Búsqueda de Historial */
+        .filtro-box { background: var(--color-tarjeta); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid var(--color-borde); display: flex; gap: 10px; align-items: center;}
+        .filtro-box input[type="date"] { flex: 1; padding: 10px; border-radius: 8px; border: none; font-family: 'Montserrat'; font-weight:600; }
+        .filtro-box button { padding: 10px 15px; background: var(--color-principal); border: none; border-radius: 8px; cursor: pointer; font-weight: 600;}
+
+        .card-viaje { background: var(--color-tarjeta); border: 1px solid var(--color-borde); border-radius: 10px; padding: 15px; margin-bottom: 10px; opacity: 0.8; }
+        .card-header { display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: 600;}
+        .badge { font-size: 11px; padding: 3px 8px; border-radius: 10px; }
+        .estado-finalizado { background: rgba(40, 167, 69, 0.2); color: #28a745; }
+        .estado-cancelado { background: rgba(220, 53, 69, 0.2); color: #dc3545; }
+
+        .btn-flotante-cierre { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; padding: 15px; background: #6c757d; color: white; border: none; border-radius: 30px; font-weight: 700; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); z-index: 1000; cursor: pointer;}
+    </style>
+</head>
+<body>
+
+    <div class="nav-tabs">
+        <a href="/admin" class="tab-btn tab-inactiva"><i class="fas fa-bolt"></i> Viajes Activos</a>
+        <a href="/admin/historial" class="tab-btn tab-activa"><i class="fas fa-history"></i> Historial PDF</a>
+    </div>
+
+    <!-- ¿Por qué?: Formulario GET hacia la misma ruta. -->
+    <!-- ¿Para qué?: Al dar buscar, la URL cambiará a ?fecha=YYYY-MM-DD, recargando Flask con los datos de ese día. -->
+    <form action="/admin/historial" method="GET" class="filtro-box">
+        <input type="date" name="fecha" value="{{ fecha_actual }}" required>
+        <button type="submit"><i class="fas fa-search"></i> Buscar</button>
+    </form>
+
+    <h4 style="text-align: center; color: #888;">Operaciones del: {{ fecha_actual }}</h4>
+
+    {% if viajes %}
+        {% for viaje in viajes %}
+        <div class="card-viaje">
+            <div class="card-header">
+                <span>#{{ viaje.id_reserva }} | {{ viaje.nombre_completo or 'Manual' }}</span>
+                <span class="badge estado-{{ viaje.estado_reserva | lower }}">{{ viaje.estado_reserva }}</span>
+            </div>
+            <div style="font-size: 13px; color: #ccc;">
+                <p style="margin:5px 0;">📍 {{ viaje.origen }} ➔ {{ viaje.destino }}</p>
+                <p style="margin:5px 0;">💵 <strong>MXN ${{ viaje.precio }}</strong></p>
+            </div>
+        </div>
+        {% endfor %}
+        
+        <!-- ¿Por qué?: Pasamos la fecha de la consulta al script JS usando un atributo de datos (data-fecha). -->
+        <button id="btn-descargar-historial" data-fecha="{{ fecha_actual }}" class="btn-flotante-cierre"><i class="fas fa-download"></i> Descargar PDF de este día</button>
+    {% else %}
+        <p style="text-align: center; color: #666;">No hay registros para este día.</p>
+    {% endif %}
+
+    <script>
+        const btnHistorial = document.getElementById('btn-descargar-historial');
+        if (btnHistorial) {
+            btnHistorial.addEventListener('click', async (e) => {
+                const fechaSeleccionada = e.target.getAttribute('data-fecha');
+                e.target.disabled = true; e.target.innerText = 'Extrayendo PDF...';
+                
+                try {
+                    // ¿Por qué?: Inyectamos la fecha en el Body del POST.
+                    // ¿Para qué?: El endpoint /admin/cierre_diario de Flask leerá esta fecha y aislará el Query SQL a ese día exacto, ignorando la función de "auto-cierre" de viajes progresos de HOY.
+                    const r = await fetch('/admin/cierre_diario', { 
+                        method: 'POST', 
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ fecha: fechaSeleccionada })
+                    });
+                    
+                    if(!r.ok) throw new Error();
+                    const blob = await r.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a'); 
+                    a.href = url; 
+                    a.download = `Corte_Historico_${fechaSeleccionada}.pdf`;
+                    a.click(); 
+                    window.URL.revokeObjectURL(url);
+                } catch { alert('Fallo al extraer el documento histórico.'); }
+                finally { e.target.disabled = false; e.target.innerText = 'Descargar PDF de este día'; }
+            });
+        }
+    </script>
+</body>
+</html>
