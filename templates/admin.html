@@ -60,13 +60,18 @@
         {% for viaje in viajes %}
         <div class="card-viaje">
             <div class="card-header">
-                <strong>#{{ viaje.id_reserva }} - 
-                    <span class="badge-estado estado-{{ viaje.estado_reserva | lower }}">{{ viaje.estado_reserva }}</span>
-                </strong>
-                <div class="header-actions">
-                    <!-- ¿Por qué?: El botón del engrane inyecta datos al Modal Maestro sin recargar la página. -->
-                    <button class="btn-gear" onclick="abrirMasterEdit({{ viaje.id_reserva }}, '{{ viaje.origen }}', '{{ viaje.destino }}', '{{ viaje.precio }}', '{{ viaje.estado_reserva }}')"><i class="fas fa-cog"></i></button>
-                </div>
+                <strong>Folio #{{ viaje.id_reserva }}</strong>
+                <!-- ¿Por qué?: Implementamos un bloque condicional exhaustivo (elif). -->
+                <!-- ¿Para qué?: Asignar la clase CSS y el texto correcto según los 4 estados posibles dictados por la base de datos. -->
+                {% if viaje.estado_reserva == 'Pendiente' %}
+                    <span class="badge-estado estado-pendiente">Pendiente</span>
+                {% elif viaje.estado_reserva == 'En_Progreso' %}
+                    <span class="badge-estado estado-progreso">En Progreso</span>
+                {% elif viaje.estado_reserva == 'Finalizado' %}
+                    <span class="badge-estado estado-finalizado" style="background: rgba(40, 167, 69, 0.2); color: #28a745;">Finalizado</span>
+                {% elif viaje.estado_reserva == 'Cancelado' %}
+                    <span class="badge-estado estado-cancelado" style="background: rgba(220, 53, 69, 0.2); color: #dc3545;">Cancelado</span>
+                {% endif %}
             </div>
             <div class="card-body">
                 <p><i class="fas fa-user"></i> {{ viaje.nombre_completo or 'Cliente Exprés' }} ({{ viaje.numero_pasajeros }} Pax)</p>
@@ -78,7 +83,13 @@
                 {% if viaje.estado_reserva == 'Pendiente' %}
                     <button class="btn-accion btn-iniciar" onclick="actualizarEstado({{ viaje.id_reserva }}, 'iniciar')">Iniciar Servicio</button>
                 {% elif viaje.estado_reserva == 'En_Progreso' %}
-                    <button class="btn-accion btn-finalizar" onclick="abrirMasterEdit({{ viaje.id_reserva }}, '{{ viaje.origen }}', '{{ viaje.destino }}', '{{ viaje.precio }}', 'En_Progreso')">Finalizar y Cobrar</button>
+                    <button class="btn-accion btn-finalizar" onclick="abrirModalEdicion({{ viaje.id_reserva }}, '{{ viaje.origen }}', '{{ viaje.destino }}', '{{ viaje.precio }}')">Finalizar y Cobrar</button>
+                {% else %}
+                    <!-- ¿Por qué?: Bloque de cierre (else) para viajes Finalizados o Cancelados. -->
+                    <!-- ¿Para qué?: Deshabilita acciones operativas, transformando la tarjeta en un elemento de solo lectura visual. -->
+                    <button class="btn-accion" style="background-color: #333; color: #777; cursor: not-allowed;" disabled>
+                        <i class="fas fa-lock"></i> Viaje Cerrado
+                    </button>
                 {% endif %}
             </div>
         </div>
