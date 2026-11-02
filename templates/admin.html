@@ -59,11 +59,15 @@
     {% if viajes %}
         
         <!-- ¿Por qué?: Inicializamos un 'namespace' nativo de Jinja2. -->
-        <!-- ¿Para qué?: Actúa como memoria RAM de la plantilla. Recuerda la fecha de la tarjeta anterior para saber matemáticamente el instante exacto en que ocurre el salto entre "Hoy" y "Mañana" e imprimir un título divisor. -->
+        <!-- ¿Para qué?: Actúa como memoria RAM de la plantilla. Recuerda la fecha para saber matemáticamente el instante exacto en que ocurre el salto entre "Hoy" y "Mañana". -->
         {% set memoria = namespace(fecha_actual='') %}
 
+        <!-- ¿Por qué?: Iniciamos un ÚNICO bucle iterativo. -->
+        <!-- ¿Para qué?: Recorrer la lista de viajes inyectada por Flask sin anidar procesos que colapsen el motor de renderizado. -->
         {% for viaje in viajes %}
             
+            <!-- ¿Por qué?: Validación condicional contra la memoria RAM de Jinja. -->
+            <!-- ¿Para qué?: Si la fecha del viaje actual es distinta a la guardada, renderizamos el divisor visual y actualizamos la memoria. -->
             {% if viaje.fecha_corte|string != memoria.fecha_actual|string %}
                 <div style="text-align: center; margin: 25px 0 15px 0; border-bottom: 1px solid var(--color-borde); padding-bottom: 10px;">
                     <span style="color: var(--color-principal); font-weight: 700; text-transform: uppercase; font-size: 14px;">
@@ -73,45 +77,48 @@
                 {% set memoria.fecha_actual = viaje.fecha_corte %}
             {% endif %}
 
-        <div class="card-viaje">
-            <!-- El código original de tu tarjeta (<div class="card-header">, etc.) permanece intacto a partir de aquí -->
-        {% for viaje in viajes %}
-        <div class="card-viaje">
-            <div class="card-header">
-                <strong>Folio #{{ viaje.id_reserva }}</strong>
-                <!-- ¿Por qué?: Implementamos un bloque condicional exhaustivo (elif). -->
-                <!-- ¿Para qué?: Asignar la clase CSS y el texto correcto según los 4 estados posibles dictados por la base de datos. -->
-                {% if viaje.estado_reserva == 'Pendiente' %}
-                    <span class="badge-estado estado-pendiente">Pendiente</span>
-                {% elif viaje.estado_reserva == 'En_Progreso' %}
-                    <span class="badge-estado estado-progreso">En Progreso</span>
-                {% elif viaje.estado_reserva == 'Finalizado' %}
-                    <span class="badge-estado estado-finalizado" style="background: rgba(40, 167, 69, 0.2); color: #28a745;">Finalizado</span>
-                {% elif viaje.estado_reserva == 'Cancelado' %}
-                    <span class="badge-estado estado-cancelado" style="background: rgba(220, 53, 69, 0.2); color: #dc3545;">Cancelado</span>
-                {% endif %}
-            </div>
-            <div class="card-body">
-                <p><i class="fas fa-user"></i> {{ viaje.nombre_completo or 'Cliente Exprés' }} ({{ viaje.numero_pasajeros }} Pax)</p>
-                <p><i class="fas fa-clock"></i> {{ viaje.fecha_hora_servicio }}</p>
-                <p><i class="fas fa-map-marker-alt"></i> {{ viaje.origen }} <i class="fas fa-arrow-right" style="font-size: 10px;"></i> {{ viaje.destino }}</p>
+            <div class="card-viaje">
+                <div class="card-header">
+                    <strong>Folio #{{ viaje.id_reserva }}</strong>
+                    
+                    <!-- ¿Por qué?: Estructura condicional (if/elif) estricta. -->
+                    <!-- ¿Para qué?: Asigna dinámicamente las insignias (badges) CSS correctas dependiendo del estado transaccional extraído de PostgreSQL. -->
+                    {% if viaje.estado_reserva == 'Pendiente' %}
+                        <span class="badge-estado estado-pendiente">Pendiente</span>
+                    {% elif viaje.estado_reserva == 'En_Progreso' %}
+                        <span class="badge-estado estado-progreso">En Progreso</span>
+                    {% elif viaje.estado_reserva == 'Finalizado' %}
+                        <span class="badge-estado estado-finalizado" style="background: rgba(40, 167, 69, 0.2); color: #28a745;">Finalizado</span>
+                    {% elif viaje.estado_reserva == 'Cancelado' %}
+                        <span class="badge-estado estado-cancelado" style="background: rgba(220, 53, 69, 0.2); color: #dc3545;">Cancelado</span>
+                    {% endif %}
+                </div>
+                
+                <div class="card-body">
+                    <p><i class="fas fa-user"></i> {{ viaje.nombre_completo or 'Cliente Exprés' }} ({{ viaje.numero_pasajeros }} Pax)</p>
+                    <p><i class="fas fa-clock"></i> {{ viaje.fecha_hora_servicio }}</p>
+                    <p><i class="fas fa-map-marker-alt"></i> {{ viaje.origen }} <i class="fas fa-arrow-right" style="font-size: 10px;"></i> {{ viaje.destino }}</p>
+                </div>
+                
+                <div class="card-actions">
+                    {% if viaje.estado_reserva == 'Pendiente' %}
+                        <button class="btn-accion btn-iniciar" onclick="actualizarEstado({{ viaje.id_reserva }}, 'iniciar')">Iniciar Servicio</button>
+                    {% elif viaje.estado_reserva == 'En_Progreso' %}
+                        <button class="btn-accion btn-finalizar" onclick="abrirModalEdicion({{ viaje.id_reserva }}, '{{ viaje.origen }}', '{{ viaje.destino }}', '{{ viaje.precio }}')">Finalizar y Cobrar</button>
+                    {% else %}
+                        <!-- ¿Por qué?: Botón deshabilitado nativamente (disabled). -->
+                        <!-- ¿Para qué?: Previene peticiones HTTP fantasma de los choferes y protege la inmutabilidad de viajes que ya fueron cerrados o cancelados. -->
+                        <button class="btn-accion" style="background-color: #333; color: #777; cursor: not-allowed;" disabled>
+                            <i class="fas fa-lock"></i> Viaje Cerrado
+                        </button>
+                    {% endif %}
+                </div>
             </div>
             
-            <div class="card-actions">
-                {% if viaje.estado_reserva == 'Pendiente' %}
-                    <button class="btn-accion btn-iniciar" onclick="actualizarEstado({{ viaje.id_reserva }}, 'iniciar')">Iniciar Servicio</button>
-                {% elif viaje.estado_reserva == 'En_Progreso' %}
-                    <button class="btn-accion btn-finalizar" onclick="abrirModalEdicion({{ viaje.id_reserva }}, '{{ viaje.origen }}', '{{ viaje.destino }}', '{{ viaje.precio }}')">Finalizar y Cobrar</button>
-                {% else %}
-                    <!-- ¿Por qué?: Bloque de cierre (else) para viajes Finalizados o Cancelados. -->
-                    <!-- ¿Para qué?: Deshabilita acciones operativas, transformando la tarjeta en un elemento de solo lectura visual. -->
-                    <button class="btn-accion" style="background-color: #333; color: #777; cursor: not-allowed;" disabled>
-                        <i class="fas fa-lock"></i> Viaje Cerrado
-                    </button>
-                {% endif %}
-            </div>
-        </div>
+        <!-- ¿Por qué?: Cierre obligatorio del bucle principal. -->
+        <!-- ¿Para qué?: Evitar rupturas del árbol DOM y TemplateSyntaxErrors (HTTP 500) en el servidor Flask. -->
         {% endfor %}
+        
     {% else %}
         <div class="card-viaje" style="text-align: center;"><p>Operación limpia. No hay viajes en cola.</p></div>
     {% endif %}
