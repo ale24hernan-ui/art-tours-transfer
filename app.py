@@ -25,12 +25,15 @@ def index():
 
 @app.route('/reservar', methods=['POST'])
 def reservar():
+    # ¿Por qué y para qué?: Capturamos las nuevas variables del DOM. El teléfono ya no viene del frontend, así que lo omitimos.
     nombre = request.form.get('nombre')
-    telefono = request.form.get('telefono')
     pasajeros = request.form.get('pasajeros')
     origen = request.form.get('origen')
     destino = request.form.get('destino')
     fecha_hora = request.form.get('fecha_hora')
+    numero_vuelo = request.form.get('numero_vuelo', 'N/A')
+    cupon = request.form.get('cupon', 'Ninguno')
+    vehiculo_asignado = request.form.get('vehiculo_asignado')
     
     conn = None
     cursor = None
@@ -39,30 +42,35 @@ def reservar():
         conn = obtener_conexion_db()
         cursor = conn.cursor()
         
+        # ¿Por qué y para qué?: Insertamos 'Obtenido vía WA' como teléfono. Esto previene un error SQL si la columna 'telefono' en la tabla 'clientes' es obligatoria, logrando un bypass elegante.
         cursor.execute("""
             INSERT INTO clientes (nombre_completo, telefono) 
             VALUES (%s, %s) 
             RETURNING id_cliente
-        """, (nombre, telefono))
+        """, (nombre, 'Obtenido vía WA'))
         id_cliente = cursor.fetchone()[0]
         
+        # ¿Por qué y para qué?: Expandimos el INSERT de reservas para empatar exactamente con tu esquema, inyectando 'numero_vuelo' y 'cupon'.
         cursor.execute("""
-            INSERT INTO reservas (id_cliente, origen, destino, fecha_hora_servicio, numero_pasajeros) 
-            VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO reservas (id_cliente, origen, destino, fecha_hora_servicio, numero_pasajeros, numero_vuelo, cupon, estado_reserva) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, 'Pendiente')
             RETURNING id_reserva
-        """, (id_cliente, origen, destino, fecha_hora, pasajeros))
+        """, (id_cliente, origen, destino, fecha_hora, pasajeros, numero_vuelo, cupon))
         id_reserva = cursor.fetchone()[0]
         
         conn.commit()
         
-        mensaje = f"Hola, soy {nombre}. Quiero confirmar mi traslado de {origen} a {destino} para {pasajeros} pasajeros el día {fecha_hora}. Folio interno: #{id_reserva}."
+        # ¿Por qué y para qué?: Enriquecemos el payload de WhatsApp para que cuando te llegue el mensaje, tengas toda la telemetría sin preguntar nada al cliente.
+        mensaje = f"Hola, soy {nombre}. Solicito un traslado de {origen} a {destino} para {pasajeros} pasajeros (Unidad: {vehiculo_asignado}) el día {fecha_hora}. Vuelo: {numero_vuelo}. Cupón: {cupon}. Folio interno: #{id_reserva}."
         mensaje_codificado = urllib.parse.quote(mensaje)
-        url_whatsapp = f"https://wa.me/5219982156446?text={mensaje_codificado}"
+        numero_empresa = "5219982156446"
+        url_whatsapp = f"https://wa.me/{numero_empresa}?text={mensaje_codificado}"
+        
         return redirect(url_whatsapp)
         
     except Exception as e:
         if conn: conn.rollback()
-        return f"Error interno: {str(e)}", 500
+        return f"Error interno al procesar la reserva: {str(e)}", 500
     finally:
         if cursor: cursor.close()
         if conn: conn.close()

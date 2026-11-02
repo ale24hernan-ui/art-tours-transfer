@@ -83,7 +83,7 @@ nav a:hover { color: var(--color-principal); }
     background: linear-gradient(135deg, var(--color-principal), var(--color-secundario));
     color: #fff; border: none; padding: 16px; border-radius: 12px; font-size: 16px;
     font-weight: 700; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 4px 15px rgba(0, 191, 255, 0.3); width: 100%;
+    box-shadow: 0 4px 15px rgba(0, 191, 255, 0.3); width: 100%; margin-top: 5px;
 }
 .widget-reserva button:active { transform: scale(0.98); }
 
