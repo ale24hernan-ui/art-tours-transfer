@@ -57,6 +57,24 @@
     <button class="btn-manual" onclick="document.getElementById('modal-crear').style.display='flex'"><i class="fas fa-plus"></i> Registrar Viaje Manual</button>
 
     {% if viajes %}
+        
+        <!-- ¿Por qué?: Inicializamos un 'namespace' nativo de Jinja2. -->
+        <!-- ¿Para qué?: Actúa como memoria RAM de la plantilla. Recuerda la fecha de la tarjeta anterior para saber matemáticamente el instante exacto en que ocurre el salto entre "Hoy" y "Mañana" e imprimir un título divisor. -->
+        {% set memoria = namespace(fecha_actual='') %}
+
+        {% for viaje in viajes %}
+            
+            {% if viaje.fecha_corte|string != memoria.fecha_actual|string %}
+                <div style="text-align: center; margin: 25px 0 15px 0; border-bottom: 1px solid var(--color-borde); padding-bottom: 10px;">
+                    <span style="color: var(--color-principal); font-weight: 700; text-transform: uppercase; font-size: 14px;">
+                        <i class="fas fa-calendar-day"></i> Agenda Operativa: {{ viaje.fecha_corte }}
+                    </span>
+                </div>
+                {% set memoria.fecha_actual = viaje.fecha_corte %}
+            {% endif %}
+
+        <div class="card-viaje">
+            <!-- El código original de tu tarjeta (<div class="card-header">, etc.) permanece intacto a partir de aquí -->
         {% for viaje in viajes %}
         <div class="card-viaje">
             <div class="card-header">

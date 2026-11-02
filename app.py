@@ -95,14 +95,28 @@ def panel_admin():
         cursor = conn.cursor()
         
         # 1. Extracción de Viajes Activos
+        # 1. Extracción Segmentada (Hoy y Mañana) con Jerarquía
+        # ¿Por qué?: Cambiamos a LEFT JOIN para no perder los viajes del Bypass manual (donde id_cliente es NULL).
+        # ¿Para qué?: Limitamos la extracción estrictamente a una ventana operativa de 48 horas. Usamos CASE WHEN para que los viajes críticos (Pendientes/En Progreso) floten arriba, y las resoluciones (Finalizados) bajen, limpiando la visión del chofer.
         cursor.execute("""
             SELECT r.id_reserva, c.nombre_completo, c.telefono, 
                    r.origen, r.destino, r.fecha_hora_servicio, 
-                   r.numero_pasajeros, r.estado_reserva, r.precio
+                   r.numero_pasajeros, r.estado_reserva, r.precio,
+                   DATE(r.fecha_hora_servicio) as fecha_corte
             FROM reservas r
-            JOIN clientes c ON r.id_cliente = c.id_cliente
-            WHERE r.estado_reserva IN ('Pendiente', 'En_Progreso')
-            ORDER BY r.fecha_hora_servicio ASC
+            LEFT JOIN clientes c ON r.id_cliente = c.id_cliente
+            WHERE DATE(r.fecha_hora_servicio) >= (NOW() AT TIME ZONE 'America/Cancun')::DATE
+              AND DATE(r.fecha_hora_servicio) <= (NOW() AT TIME ZONE 'America/Cancun')::DATE + INTERVAL '1 day'
+            ORDER BY 
+                DATE(r.fecha_hora_servicio) ASC,
+                CASE 
+                    WHEN r.estado_reserva = 'Pendiente' THEN 1
+                    WHEN r.estado_reserva = 'En_Progreso' THEN 2
+                    WHEN r.estado_reserva = 'Finalizado' THEN 3
+                    WHEN r.estado_reserva = 'Cancelado' THEN 4
+                    ELSE 5
+                END ASC,
+                r.fecha_hora_servicio ASC
         """)
         
         columnas = [desc[0] for desc in cursor.description]
