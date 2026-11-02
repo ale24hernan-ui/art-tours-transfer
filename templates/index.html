@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ART-TOURS TRANSFER | Transporte Privado en Cancún</title>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Mantenemos la versión CSS intacta ya que tu styles.css no requirió modificaciones estructurales para esto -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=1.5">
 </head>
 
@@ -34,13 +36,11 @@
                 <div style="display: flex; gap: 10px;">
                     <div style="flex: 1;">
                         <label for="pasajeros"><i class="fas fa-users"></i> Pasajeros:</label>
-                        <!-- ¿Por qué y para qué?: Rango 1-20. Detonará la asignación automática en JS al modificarse. -->
                         <input type="number" id="pasajeros" name="pasajeros" min="1" max="20" value="1" required>
                     </div>
                     
                     <div style="flex: 2;">
                         <label for="vehiculo_asignado"><i class="fas fa-shuttle-van"></i> Vehículo Asignado:</label>
-                        <!-- ¿Por qué y para qué?: Input de solo lectura (readonly). El cliente ve la unidad, pero no puede alterarla. Se envía en el POST al backend. -->
                         <input type="text" id="vehiculo_asignado" name="vehiculo_asignado" readonly style="background: rgba(0, 191, 255, 0.1); color: #00bfff; font-weight: bold; border-color: #00bfff;">
                     </div>
                 </div>
@@ -48,19 +48,31 @@
                 <label for="origen"><i class="fas fa-map-marker-alt"></i> Lugar de Inicio:</label>
                 <select id="origen" name="origen" required>
                     <option value="" disabled selected>¿Dónde te recogemos?</option>
-                    <option value="aeropuerto_cun">Aeropuerto Cancún</option>
-                    <option value="zona_hotelera_cun">Zona Hotelera Cancún</option>
-                    <option value="hotel_tulum">Tulum</option>
-                    <option value="hotel_playa_carmen">Playa del Carmen</option>
+                    <!-- ¿Por qué y para qué?: Bucle Jinja2. Intercepta el arreglo 'puntos_interes' extraído de PostgreSQL en app.py. -->
+                    <!-- Si mañana insertas un nuevo destino en tu BD, este bucle lo renderizará automáticamente sin que toques el HTML. -->
+                    {% if puntos_interes %}
+                        {% for punto in puntos_interes %}
+                            <option value="{{ punto }}">{{ punto }}</option>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Fallback estático en caso de desconexión temporal de la BD -->
+                        <option value="Aeropuerto Cancún">Aeropuerto Cancún</option>
+                        <option value="Zona Hotelera Cancún">Zona Hotelera Cancún</option>
+                    {% endif %}
                 </select>
 
                 <label for="destino"><i class="fas fa-map-pin"></i> Destino Final:</label>
                 <select id="destino" name="destino" required>
                     <option value="" disabled selected>¿A dónde vamos?</option>
-                    <option value="zona_hotelera_cun">Zona Hotelera Cancún</option>
-                    <option value="hotel_playa_carmen">Playa del Carmen</option>
-                    <option value="hotel_tulum">Tulum</option>
-                    <option value="aeropuerto_cun">Aeropuerto Cancún</option>
+                    <!-- Reutilizamos exactamente el mismo motor dinámico para el destino -->
+                    {% if puntos_interes %}
+                        {% for punto in puntos_interes %}
+                            <option value="{{ punto }}">{{ punto }}</option>
+                        {% endfor %}
+                    {% else %}
+                        <option value="Zona Hotelera Cancún">Zona Hotelera Cancún</option>
+                        <option value="Aeropuerto Cancún">Aeropuerto Cancún</option>
+                    {% endif %}
                 </select>
 
                 <div style="display: flex; gap: 10px;">
@@ -109,71 +121,46 @@
         <h2>Nuestra Flota</h2>
         <p class="subtitulo-flota">Inventario de unidades recientes operando en la Riviera Maya</p>
         <div class="grid-flota">
-            
             <div class="tarjeta-vehiculo">
                 <h4>Sedán Jetta</h4>
                 <p class="pax-badge"><i class="fas fa-user-friends"></i> 2 Pax</p>
-                <div class="img-flota-container">
-                    <img src="{{ url_for('static', filename='images/jetta.jpg') }}" alt="Sedán Jetta para 2 pasajeros" loading="lazy">
-                </div>
+                <div class="img-flota-container"><img src="{{ url_for('static', filename='images/jetta.jpg') }}" alt="Sedán Jetta" loading="lazy"></div>
             </div>
-
             <div class="tarjeta-vehiculo">
                 <h4>Toyota Sienna</h4>
                 <p class="pax-badge"><i class="fas fa-users"></i> 5 Pax</p>
-                <div class="img-flota-container">
-                    <img src="{{ url_for('static', filename='images/sienna.jpg') }}" alt="Toyota Sienna para 5 pasajeros" loading="lazy">
-                </div>
+                <div class="img-flota-container"><img src="{{ url_for('static', filename='images/sienna.jpg') }}" alt="Toyota Sienna" loading="lazy"></div>
             </div>
-
             <div class="tarjeta-vehiculo">
                 <h4>Transporter VW</h4>
                 <p class="pax-badge"><i class="fas fa-users"></i> 7 Pax</p>
-                <div class="img-flota-container">
-                    <img src="{{ url_for('static', filename='images/transporter.jpg') }}" alt="Transporter VW para 7 pasajeros" loading="lazy">
-                </div>
+                <div class="img-flota-container"><img src="{{ url_for('static', filename='images/transporter.jpg') }}" alt="Transporter VW" loading="lazy"></div>
             </div>
-
             <div class="tarjeta-vehiculo">
                 <h4>Toyota Hiace</h4>
                 <p class="pax-badge"><i class="fas fa-users"></i> 9 Pax</p>
-                <div class="img-flota-container">
-                    <img src="{{ url_for('static', filename='images/hiace.jpg') }}" alt="Toyota Hiace para 9 pasajeros" loading="lazy">
-                </div>
+                <div class="img-flota-container"><img src="{{ url_for('static', filename='images/hiace.jpg') }}" alt="Toyota Hiace" loading="lazy"></div>
             </div>
-
             <div class="tarjeta-vehiculo">
                 <h4>Urvan Nissan</h4>
                 <p class="pax-badge"><i class="fas fa-users"></i> 10 Pax</p>
-                <div class="img-flota-container">
-                    <img src="{{ url_for('static', filename='images/urvan.jpg') }}" alt="Urvan Nissan para 10 pasajeros" loading="lazy">
-                </div>
+                <div class="img-flota-container"><img src="{{ url_for('static', filename='images/urvan.jpg') }}" alt="Urvan Nissan" loading="lazy"></div>
             </div>
-
             <div class="tarjeta-vehiculo">
                 <h4>Hiace 2019</h4>
                 <p class="pax-badge"><i class="fas fa-users"></i> 12 Pax</p>
-                <div class="img-flota-container">
-                    <img src="{{ url_for('static', filename='images/hiace2019.jpg') }}" alt="Toyota Hiace 2019 para 12 pasajeros" loading="lazy">
-                </div>
+                <div class="img-flota-container"><img src="{{ url_for('static', filename='images/hiace2019.jpg') }}" alt="Toyota Hiace 2019" loading="lazy"></div>
             </div>
-
             <div class="tarjeta-vehiculo">
                 <h4>Jac</h4>
                 <p class="pax-badge"><i class="fas fa-users"></i> 15 Pax</p>
-                <div class="img-flota-container">
-                    <img src="{{ url_for('static', filename='images/jac.jpg') }}" alt="Jac para 15 pasajeros" loading="lazy">
-                </div>
+                <div class="img-flota-container"><img src="{{ url_for('static', filename='images/jac.jpg') }}" alt="Jac" loading="lazy"></div>
             </div>
-
             <div class="tarjeta-vehiculo">
                 <h4>Sprinter</h4>
                 <p class="pax-badge"><i class="fas fa-users"></i> 20 Pax</p>
-                <div class="img-flota-container">
-                    <img src="{{ url_for('static', filename='images/sprinter.jpg') }}" alt="Sprinter para 20 pasajeros" loading="lazy">
-                </div>
+                <div class="img-flota-container"><img src="{{ url_for('static', filename='images/sprinter.jpg') }}" alt="Sprinter" loading="lazy"></div>
             </div>
-
         </div>
     </section>
 
@@ -191,14 +178,16 @@
             </a>
         </div>
         <p>© 2026 ART-TOURS TRANSFER. Todos los derechos reservados.</p>
+        
+        <!-- ¿Por qué y para qué?: Firma de autoría discreta. Protege la marca del negocio pero asienta tu propiedad intelectual sobre el código. -->
+        <!-- Se aplicó opacidad (color: #555) y tamaño reducido para no competir con el Call to Action. -->
+        <p style="font-size: 11px; color: #555; margin-top: 20px; font-weight: 600;">Desarrollo web creado por Alejandro H.M. | Tel. 9987671050</p>
     </section> 
 
-    <!-- Script de Asignación Logística (Reemplaza la dependencia externa app.js) -->
     <script>
         const inputPasajeros = document.getElementById('pasajeros');
         const inputVehiculo = document.getElementById('vehiculo_asignado');
 
-        // ¿Por qué y para qué?: Función algorítmica. Intercepta la cantidad de pasajeros y asigna invariablemente la unidad exacta según tu catálogo operativo.
         function asignarVehiculo() {
             let pax = parseInt(inputPasajeros.value);
             if (isNaN(pax) || pax < 1) pax = 1;
@@ -216,10 +205,7 @@
             inputVehiculo.value = vehiculo;
         }
 
-        // Ejecutar al cargar la página por primera vez
         asignarVehiculo();
-        
-        // Ejecutar cada vez que el usuario teclee o mueva las flechas del input
         inputPasajeros.addEventListener('input', asignarVehiculo);
     </script>
 </body>
