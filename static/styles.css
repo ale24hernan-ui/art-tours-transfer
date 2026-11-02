@@ -1,491 +1,159 @@
-/* =========================================
-   1. RESET BÁSICO Y VARIABLES DE MARCA
-   ========================================= */
+/* ======================================================== */
+/* 1. SISTEMA DE DISEÑO BASE (Identidad ART-TOURS)          */
+/* ======================================================== */
+:root {
+    --color-principal: #00bfff;
+    --color-secundario: #005c8a;
+    --color-fondo: #050505;
+    --color-tarjeta: rgba(20, 20, 20, 0.6);
+    --color-borde: rgba(255, 255, 255, 0.08);
+    --color-texto: #ffffff;
+}
 
-/* El asterisco (*) selecciona todos los elementos de la página web. */
 * {
-    /* Quitamos el margen que los navegadores ponen por defecto para tener control total. */
-    margin: 0;
-    /* Quitamos el relleno interno automático. */
-    padding: 0;
-    /* Evita que los bordes aumenten el tamaño total de los elementos. */
-    box-sizing: border-box;
-    /* Definimos una tipografía limpia, moderna y fácil de leer en móviles. */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-/* =========================================
-   2. BARRA DE NAVEGACIÓN (HEADER)
-   ========================================= */
-
-/* Seleccionamos el contenedor principal del menú. */
-header {
-    /* Usamos el color Negro de la identidad visual de la marca para dar elegancia. */
-    background-color: #000000; 
-    /* Aplicamos Flexbox para alinear el logotipo a la izquierda y el menú a la derecha. */
-    display: flex;
-    /* Separa los elementos empujándolos a los extremos. */
-    justify-content: space-between;
-    /* Centra los elementos verticalmente dentro de la barra negra. */
-    align-items: center;
-    /* Relleno interno: 20px arriba/abajo, 50px a los lados. */
-    padding: 20px 50px;
-    /* Fija la barra en la parte superior para que siempre esté visible al bajar. */
-    position: fixed;
-    /* Asegura que la barra ocupe el 100% del ancho de la pantalla. */
-    width: 100%;
-    /* Z-index alto asegura que la barra siempre esté por encima de las imágenes. */
-    z-index: 1000;
-}
-
-/* Estilo para el texto "ART-TOURS TRANSFER" que hace de logotipo. */
-header strong {
-    /* Color blanco para contrastar con el fondo negro. */
-    color: #ffffff;
-    /* Tamaño de letra grande. */
-    font-size: 24px;
-    /* Espacio entre letras para un aspecto más premium. */
-    letter-spacing: 2px;
-}
-
-/* Estilo para los enlaces de navegación (Nuestros Servicios, Nuestra Flota, Contacto). */
-nav a {
-    /* Color blanco para el texto. */
-    color: #ffffff;
-    /* Quita el subrayado azul feo que traen los enlaces por defecto. */
-    text-decoration: none;
-    /* Separa cada botón del menú por 20px. */
-    margin-left: 20px;
-    /* Tamaño de letra estándar. */
-    font-size: 16px;
-    /* Hace que el cambio de color al pasar el mouse sea suave (0.3 segundos). */
-    transition: color 0.3s ease;
-}
-
-/* Efecto al pasar el mouse (hover) sobre los enlaces del menú. */
-nav a:hover {
-    /* Cambia al color Azul Cian/Eléctrico de la identidad de la marca. */
-    color: #00bfff; 
-}
-
-/* =========================================
-   3. SECCIÓN PRINCIPAL (HERO) Y FONDO
-   ========================================= */
-/* =========================================
-   CONTROL DEL LOGOTIPO OFICIAL
-   ========================================= */
-
-/* Seleccionamos la imagen usando la clase que le asignamos en el HTML */
-.logo-img {
-    /* Limitamos la altura a 70px para que encaje dentro del header negro sin desbordarse */
-    height: 70px;
-    /* width: auto mantiene la proporción original del logo para que no se vea estirado ni aplastado */
-    width: auto;
-    /* Agregamos una transición de 0.3 segundos para futuros efectos al pasar el cursor */
-    transition: transform 0.3s ease;
-}
-
-/* =========================================
-   ACTUALIZACIÓN DE LA SECCIÓN HERO (IMAGEN DE FONDO)
-   ========================================= */
-
-/* Seleccionamos la sección principal de bienvenida */
-/* Seleccionamos la sección principal de bienvenida */
-#hero {
-    /* Quitamos el '/static/' inicial porque el CSS ya se encuentra dentro de esa carpeta */
-    /* Apuntamos directamente a la subcarpeta 'images/' */
-    background: url('images/playa-1-fondolargo.jpg') no-repeat center center/cover;
-    background-color: rgba(0, 0, 0, 0.6); 
-    background-blend-mode: overlay;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-}
-
-/* =========================================
-   4. ESTILOS DE CONTACTO Y PIE DE PÁGINA
-   ========================================= */
-
-/* Sección de contacto rápido */
-#contacto {
-    /* Fondo blanco limpio. */
-    background-color: #ffffff;
-    /* Relleno para separar el texto de los bordes. */
-    padding: 50px 20px;
-    /* Centra el texto. */
-    text-align: center;
-}
-
-/* Títulos dentro de la sección de contacto */
-#contacto h3 {
-    /* Color negro. */
-    color: #000000;
-    /* Margen inferior para separarlo del número de WhatsApp. */
-    margin-bottom: 20px;
-}
-
-/* Párrafos de contacto (WhatsApp y Correo) */
-#contacto p {
-    /* Color gris oscuro para jerarquía secundaria. */
-    color: #333333;
-    /* Interlineado cómodo para la lectura. */
-    line-height: 1.6;
-    /* Tamaño de fuente legible. */
-    font-size: 18px;
-}
-/* =========================================
-   5. CONTENEDOR DEL LOGOTIPO EN EL HEADER
-   ========================================= */
-
-/* Seleccionamos el enlace que envuelve el logo */
-.logo-container {
-    /* Quitamos cualquier subrayado o efecto de enlace heredado */
-    text-decoration: none;
-    /* Usamos Flexbox interno para alinear la imagen perfectamente al centro vertical */
-    display: flex;
-    align-items: center;
-}
-/* =========================================
-   ESTILOS DEL TEXTO HERO
-   ========================================= */
-
-/* Seleccionamos el título principal (h1) que está dentro de la sección hero */
-#hero h1 {
-    /* Cambiamos el color de la fuente a blanco puro para crear contraste máximo contra el fondo oscuro */
-    color: #ffffff;
-    /* Aumentamos el tamaño de la fuente a 3 unidades relativas (aprox 48px) para que sea imponente */
-    font-size: 3rem;
-    /* Agregamos una sombra negra sutil detrás del texto para que resalte aún más sobre zonas claras de la foto */
-    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
-    /* Separamos el título del párrafo que le sigue agregando un margen inferior de 15 píxeles */
-    margin-bottom: 15px;
-}
-
-/* Seleccionamos el párrafo descriptivo (p) dentro del hero */
-#hero p {
-    /* Color blanco puro para coherencia visual */
-    color: #ffffff;
-    /* Tamaño de fuente intermedio, lo suficientemente grande para leerse en celulares */
-    font-size: 1.5rem;
-    /* Sombra paralela más suave para la lectura prolongada */
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
-    /* Margen inferior amplio para empujar el formulario de reservas hacia abajo y respirar visualmente */
-    margin-bottom: 40px;
-}
-
-/* =========================================
-   EFECTO GLASSMORPHISM PARA EL FORMULARIO
-   ========================================= */
-
-/* Seleccionamos la caja que envuelve todo el formulario de reservación */
-.widget-reserva {
-    /* Aplicamos un fondo blanco casi transparente (15% de opacidad) simulando el vidrio */
-    background: rgba(255, 255, 255, 0.15);
-    /* La magia: Desenfoca (blur) los píxeles de la imagen de fondo que quedan detrás de esta caja */
-    backdrop-filter: blur(10px);
-    /* Suaviza los bordes para navegadores de Apple (Safari) */
-    -webkit-backdrop-filter: blur(10px);
-    /* Espacio interno amplio para que los elementos no choquen con los bordes del cristal */
-    padding: 35px 40px;
-    /* Redondeamos las esquinas de la caja de cristal para un aspecto amigable y moderno */
-    border-radius: 15px;
-    /* Agregamos un borde blanco ultra delgado y semitransparente para simular el reflejo de la luz en el cristal */
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    /* Proyectamos una sombra difusa debajo de la caja para que parezca que flota sobre la arena */
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    /* Limitamos el ancho máximo para que no se estire demasiado en pantallas de PC gigantes */
-    max-width: 400px;
-    /* Asegura que el widget ocupe el 100% de su contenedor hasta llegar a los 400px de límite */
-    width: 100%;
-}
-
-/* Estilizamos las etiquetas de texto (Número de Pasajeros) dentro del widget */
-.widget-reserva label {
-    /* Texto blanco para contrastar con el cristal oscuro */
-    color: #ffffff;
-    /* Fuerza a que el texto ocupe toda su propia línea, empujando el input hacia abajo */
-    display: block;
-    /* Separación inferior entre la etiqueta y el cuadro de escritura */
-    margin-bottom: 10px;
-    /* Texto en negritas para mayor claridad funcional */
-    font-weight: bold;
-    /* Tamaño de texto estándar */
-    font-size: 1.1rem;
-}
-
-/* Estilizamos el cuadro donde el usuario escribe el número */
-.widget-reserva input {
-    /* Ancho completo para maximizar el área táctil en teléfonos móviles */
-    width: 100%;
-    /* Espaciado interno cómodo para escribir */
-    padding: 12px;
-    /* Margen inferior para separarlo del botón de envío */
-    margin-bottom: 20px;
-    /* Quitamos el borde negro estándar de HTML */
-    border: none;
-    /* Bordes ligeramente redondeados a juego con la caja principal */
-    border-radius: 8px;
-    /* Aumentamos el tamaño de los números que el turista escribe */
-    font-size: 1.1rem;
-}
-
-/* Estilizamos el botón de llamado a la acción (Call to Action) */
-.widget-reserva button {
-    /* Ancho al 100% para ser fácilmente clickeable */
-    width: 100%;
-    /* Aplicamos tu color oficial Azul Cian para resaltar la acción principal */
-    background-color: #00bfff;
-    /* Color de texto del botón en blanco */
-    color: #ffffff;
-    /* Espaciado interno para que sea un botón grueso y prominente */
-    padding: 14px;
-    /* Quitamos los bordes feos por defecto */
-    border: none;
-    /* Esquinas redondeadas congruentes con el diseño general */
-    border-radius: 8px;
-    /* Texto en negritas e incrementado para detonar urgencia y claridad */
-    font-weight: bold;
-    font-size: 1.1rem;
-    /* Cambia el cursor por una manita (pointer) indicando que es un elemento interactivo */
-    cursor: pointer;
-    /* Prepara una animación suave de 0.3 segundos para cuando el mouse pase por encima */
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-/* Efecto al pasar el cursor sobre el botón (Hover) */
-.widget-reserva button:hover {
-    /* Oscurecemos ligeramente el azul cian para dar retroalimentación visual al usuario */
-    background-color: #0099cc;
-    /* Elevamos visualmente el botón 2 píxeles hacia arriba para dar sensación táctil */
-    transform: translateY(-2px);
-}
-/* =========================================
-   ESTILOS DE REDES SOCIALES Y WHATSAPP FLOTANTE
-   ========================================= */
-
-/* Reglas para el botón flotante de WhatsApp */
-.btn-flotante-whatsapp {
-    /* Fija el botón respecto a la ventana del navegador, no importa si haces scroll */
-    position: fixed;
-    /* Lo separa 30 píxeles desde el borde inferior de la pantalla */
-    bottom: 30px;
-    /* Lo separa 30 píxeles desde el borde derecho de la pantalla */
-    right: 30px;
-    /* Aplica el color verde oficial de la marca WhatsApp */
-    background-color: #25d366;
-    /* El ícono de adentro será de color blanco puro */
-    color: #ffffff;
-    /* Hacemos el botón un círculo perfecto (ancho y alto iguales) */
-    width: 60px;
-    height: 60px;
-    /* border-radius 50% redondea un cuadrado hasta hacerlo un círculo */
-    border-radius: 50%;
-    /* Centramos el ícono usando Flexbox */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* Hacemos el ícono de FontAwesome más grande */
-    font-size: 35px;
-    /* Agregamos una sombra oscura para que parezca que flota sobre la página */
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
-    /* Preparamos una animación suave para cuando el mouse pase por encima */
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    /* Aseguramos que siempre esté por encima de fotos y textos (Z-index alto) */
-    z-index: 1000;
-    /* Quitamos el subrayado típico de los enlaces HTML */
-    text-decoration: none;
-}
-
-/* Efecto Hover: Lo que pasa cuando el turista pone el mouse sobre el botón de WhatsApp */
-.btn-flotante-whatsapp:hover {
-    /* El botón crece un 10% (scale 1.1) para invitar al clic */
-    transform: scale(1.1);
-    /* La sombra se hace más grande, dando la ilusión de que el botón se acerca al usuario */
-    box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.5);
-    /* Aseguramos que el ícono siga siendo blanco */
-    color: #ffffff;
-}
-
-/* Estilos para el contenedor de redes en el pie de página (Footer) */
-.redes-sociales {
-    /* Margen para separarlo de los correos y del texto de derechos reservados */
-    margin: 20px 0;
-}
-
-/* Estilos para el enlace/botón de Facebook */
-.icono-facebook {
-    /* Usamos el color Azul Cian oficial de tu marca en lugar del azul de Facebook para mantener identidad visual */
-    color: #00bfff;
-    /* Quitamos el subrayado */
-    text-decoration: none;
-    /* Tamaño de letra legible */
-    font-size: 1.2rem;
-    /* Fuente en negritas para destacar */
-    font-weight: bold;
-    /* Transición suave para el cambio de color */
-    transition: color 0.3s ease;
-}
-
-/* Efecto Hover para el enlace de Facebook */
-.icono-facebook:hover {
-    /* Se oscurece ligeramente al pasar el cursor */
-    color: #0099cc;
-}
-/* =========================================
-   6. SECCIONES: SERVICIOS Y FLOTA (DISEÑO GENERAL)
-   ========================================= */
-
-/* Estilos comunes para ambas secciones (servicios y flota) */
-#servicios, #flota {
-    /* Fondo muy claro para contrastar con el blanco puro de las tarjetas */
-    background-color: #f4f4f9; 
-    /* Relleno: 60px arriba/abajo, 20px a los lados (para que no pegue en el borde del celular) */
-    padding: 60px 20px;
-    /* Todo el texto dentro de estas secciones irá centrado */
-    text-align: center;
-}
-
-/* Estilo para los títulos principales (H2) de estas secciones */
-#servicios h2, #flota h2 {
-    /* Color oscuro */
-    color: #333;
-    /* Margen abajo para separarlos de las tarjetas */
-    margin-bottom: 40px;
-    /* Tamaño de fuente grande */
-    font-size: 32px;
-}
-
-/* =========================================
-   7. CONTENEDORES Y TARJETAS (FLEXBOX)
-   ========================================= */
-
-/* Contenedor que agrupa las tarjetas. Aquí sucede la "magia" responsiva */
-.contenedor-tarjetas {
-    /* Activamos Flexbox */
-    display: flex;
-    /* Permite que si las tarjetas no caben en una fila, pasen a la de abajo automáticamente */
-    flex-wrap: wrap;
-    /* Centra las tarjetas horizontalmente */
-    justify-content: center;
-    /* Espacio o hueco de 30px entre cada tarjeta */
-    gap: 30px;
-    /* Ancho máximo para que en pantallas gigantes no se estire de más */
-    max-width: 1200px;
-    /* Margen auto a los lados para centrar el contenedor en la pantalla */
-    margin: 0 auto;
-}
-
-/* Estilos individuales para CADA tarjeta de servicio y de vehículo */
-.tarjeta-servicio, .tarjeta-vehiculo {
-    /* Fondo blanco puro para que resalte sobre el fondo gris claro */
-    background-color: #ffffff;
-    /* Borde redondeado suave para un look moderno */
-    border-radius: 10px;
-    /* Relleno interno para que el texto no toque los bordes */
-    padding: 30px;
-    /* Ancho base de cada tarjeta. Usamos calc() para restar el espacio del gap y que quepan 3 en una fila */
-    width: calc(33.333% - 30px);
-    /* Ancho mínimo para que en celulares no se hagan súper delgadas */
-    min-width: 280px;
-    /* Sombra muy sutil para dar efecto de "elevación" (3D) */
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    /* Transición suave para el efecto al pasar el mouse */
-    transition: transform 0.3s ease;
-}
-
-/* Efecto Hover: Cuando el usuario pasa el mouse por encima de una tarjeta */
-.tarjeta-servicio:hover, .tarjeta-vehiculo:hover {
-    /* La tarjeta "sube" 10 píxeles, dando interactividad */
-    transform: translateY(-10px);
-}
-
-/* Ajustes para el texto dentro de las tarjetas */
-.tarjeta-servicio h3, .tarjeta-vehiculo h4 {
-    color: #00bfff; /* Color azul cian oficial de la marca */
-    margin-bottom: 15px;
-}
-
-.tarjeta-servicio p, .tarjeta-vehiculo p {
-    color: #666;
-    line-height: 1.5;
-}
-
-/* =========================================
-   8. PLACEHOLDER (MARCADOR) DE IMÁGENES DE VEHÍCULOS
-   ========================================= */
-
-/* Este es un espacio reservado temporal hasta que el cliente te mande las fotos reales */
-.placeholder-img {
-    /* Fondo gris medio */
-    background-color: #ddd;
-    /* Altura fija de 150px para visualizar el espacio que ocupará la foto */
-    height: 150px;
-    /* Separación superior */
-    margin-top: 20px;
-    /* Centrar texto verticalmente */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* Color de texto oscuro */
-    color: #555;
-    /* Bordes ligeramente redondeados */
-    border-radius: 5px;
-}
-/* =========================================
-   9. MEJORAS DE UI: TIPOGRAFÍA Y FORMULARIOS
-   ========================================= */
-
-/* Sobrescribimos la regla general para aplicar la nueva fuente en toda la página */
-* {
-    /* Cambiamos la fuente genérica por Montserrat, dejando sans-serif como respaldo en caso de fallo */
+    margin: 0; padding: 0; box-sizing: border-box;
     font-family: 'Montserrat', sans-serif;
 }
 
-/* Aplicamos estilos modernos a todos los inputs (cajas de texto/números/fechas) y selects (listas desplegables) */
-input, select {
-    /* Ocupan el 100% del ancho disponible en su contenedor */
-    width: 100%;
-    /* Relleno interno cómodo para que el texto no se vea apretado */
-    padding: 12px 15px;
-    /* Separación inferior entre cada campo */
-    margin-bottom: 15px;
-    /* Borde sutil y moderno en color gris claro */
-    border: 1px solid #ccc;
-    /* Bordes ligeramente redondeados */
-    border-radius: 8px;
-    /* Tamaño de letra legible */
-    font-size: 16px;
-    /* Color de texto oscuro y elegante */
-    color: #333;
-    /* Quitamos el estilo antiguo que Safari, Chrome o Edge le ponen por defecto a las listas desplegables */
-    appearance: none; 
-    /* Cambiamos el cursor a una 'mano' cuando el usuario pase el mouse por una lista desplegable */
-    cursor: pointer;
-    /* Transición suave al hacer clic en ellos */
-    transition: border-color 0.3s ease;
+body {
+    background-color: var(--color-fondo); color: var(--color-texto);
+    line-height: 1.6;
 }
 
-/* Efecto Focus: Cuando el cliente hace clic dentro del campo para escribir */
-input:focus, select:focus {
-    /* Quitamos el contorno negro feo por defecto */
-    outline: none;
-    /* Cambiamos el color del borde al Azul Cian de la marca para indicar que está activo */
-    border-color: #00bfff;
-    /* Añadimos un pequeño resplandor azul alrededor */
-    box-shadow: 0 0 5px rgba(0, 191, 255, 0.3);
+/* ======================================================== */
+/* 2. NAVEGACIÓN Y HERO                                     */
+/* ======================================================== */
+header {
+    background: rgba(5, 5, 5, 0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--color-borde);
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 15px 50px; position: fixed; width: 100%; z-index: 1000;
 }
 
-/* Agregamos una flecha personalizada a los menús desplegables ya que le quitamos la de defecto con appearance:none */
-select {
-    /* Ponemos un icono de flecha hacia abajo como fondo de la caja, posicionado a la derecha */
-    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
-    /* Evita que la flechita se repita como mosaico */
-    background-repeat: no-repeat;
-    /* Posiciona la flechita a la derecha (95%) y al centro verticalmente */
-    background-position: right 15px center;
-    /* Tamaño de la flechita */
-    background-size: 12px;
+.logo-img { height: 70px; width: auto; transition: transform 0.3s ease; }
+
+nav a {
+    color: #ffffff; text-decoration: none; margin-left: 20px;
+    font-size: 16px; font-weight: 600; transition: color 0.3s ease;
 }
+nav a:hover { color: var(--color-principal); }
+
+#hero {
+    background: linear-gradient(to bottom, rgba(5,5,5,0.7), rgba(5,5,5,0.95)), url('images/playa-1-fondolargo.jpg') no-repeat center center/cover;
+    min-height: 100vh; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; text-align: center;
+    padding-top: 80px;
+}
+#hero h1 { font-size: 3rem; text-shadow: 2px 2px 5px rgba(0,0,0,0.8); margin-bottom: 10px; }
+#hero p { font-size: 1.5rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); margin-bottom: 30px; }
+
+/* ======================================================== */
+/* 3. WIDGET DE RESERVAS (Glassmorphism)                    */
+/* ======================================================== */
+.widget-reserva {
+    background: rgba(25, 25, 25, 0.65); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
+    padding: 30px; width: 90%; max-width: 500px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+.widget-reserva form { display: flex; flex-direction: column; gap: 15px; text-align: left;}
+
+.widget-reserva label {
+    font-size: 13px; font-weight: 600; color: var(--color-principal);
+    text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+.widget-reserva input, .widget-reserva select {
+    background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px; padding: 14px; color: #fff; font-size: 16px;
+    transition: all 0.3s ease; appearance: none; width: 100%;
+}
+.widget-reserva input:focus, .widget-reserva select:focus {
+    background: rgba(255, 255, 255, 0.1); border-color: var(--color-principal);
+    outline: none; box-shadow: 0 0 15px rgba(0, 191, 255, 0.25);
+}
+.widget-reserva select {
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat; background-position: right 15px center; background-size: 12px;
+}
+.widget-reserva select option { background-color: var(--color-fondo); color: #fff; }
+
+.widget-reserva button {
+    background: linear-gradient(135deg, var(--color-principal), var(--color-secundario));
+    color: #fff; border: none; padding: 16px; border-radius: 12px; font-size: 16px;
+    font-weight: 700; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 15px rgba(0, 191, 255, 0.3); width: 100%;
+}
+.widget-reserva button:active { transform: scale(0.98); }
+
+/* ======================================================== */
+/* 4. SECCIONES GENERALES (Servicios)                       */
+/* ======================================================== */
+#servicios, #flota {
+    background-color: #f4f4f9; padding: 60px 20px; text-align: center; color: #333;
+}
+#servicios h2, #flota h2 { margin-bottom: 40px; font-size: 32px; }
+
+.contenedor-tarjetas {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 30px;
+    max-width: 1200px; margin: 0 auto;
+}
+.tarjeta-servicio {
+    background-color: #ffffff; border-radius: 10px; padding: 30px;
+    width: calc(33.333% - 30px); min-width: 280px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); transition: transform 0.3s ease;
+}
+.tarjeta-servicio:hover { transform: translateY(-10px); }
+.tarjeta-servicio h3 { color: var(--color-principal); margin-bottom: 15px; }
+
+/* ======================================================== */
+/* 5. CATÁLOGO DE FLOTA (CSS Grid Responsivo)               */
+/* ======================================================== */
+.grid-flota {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px; max-width: 1200px; margin: 0 auto;
+}
+.subtitulo-flota { color: #666; margin-top: -30px; margin-bottom: 40px; font-size: 18px; }
+
+.tarjeta-vehiculo {
+    background-color: #ffffff; border-radius: 12px; padding: 25px 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease; text-align: center;
+}
+.tarjeta-vehiculo:hover { transform: translateY(-8px); box-shadow: 0 12px 25px rgba(0,191,255,0.15); }
+.tarjeta-vehiculo h4 { color: #333; font-size: 20px; margin-bottom: 10px; text-transform: uppercase; }
+
+.pax-badge {
+    display: inline-block; background: rgba(0, 191, 255, 0.1); color: var(--color-principal);
+    font-weight: 700; padding: 5px 15px; border-radius: 20px; font-size: 14px; margin-bottom: 20px;
+}
+
+.img-flota-container {
+    width: 100%; height: 160px; background: #f9f9f9; border-radius: 8px; overflow: hidden;
+    display: flex; justify-content: center; align-items: center; padding: 10px;
+}
+.img-flota-container img { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.3s ease; }
+.tarjeta-vehiculo:hover .img-flota-container img { transform: scale(1.05); }
+
+/* ======================================================== */
+/* 6. CONTACTO Y FOOTER                                     */
+/* ======================================================== */
+#contacto { background-color: #ffffff; padding: 50px 20px; text-align: center; color: #333; }
+#contacto h3 { margin-bottom: 20px; font-size: 24px;}
+#contacto p { color: #555; font-size: 16px; margin-bottom: 5px; }
+
+.redes-sociales { margin: 25px 0; }
+.icono-facebook {
+    color: var(--color-principal); text-decoration: none; font-size: 18px;
+    font-weight: bold; transition: color 0.3s ease;
+}
+.icono-facebook:hover { color: var(--color-secundario); }
+
+.btn-flotante-whatsapp {
+    position: fixed; bottom: 30px; right: 30px; background-color: #25d366; color: #ffffff;
+    width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center;
+    align-items: center; font-size: 35px; box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease; z-index: 1000; text-decoration: none;
+}
+.btn-flotante-whatsapp:hover { transform: scale(1.1); box-shadow: 2px 2px 15px rgba(0,0,0,0.5); color: #fff;}
