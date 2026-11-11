@@ -86,7 +86,6 @@
                             <span class="badge-estado estado-cancelado">Cancelado</span>
                         {% endif %}
                     </div>
-                    <!-- Botón Engrane para Master Edit -->
                     <!-- Botón Engrane para Master Edit Expandido -->
 <button class="btn-gear" 
     data-id="{{ viaje.id_reserva }}"
@@ -239,9 +238,95 @@
     </div>
 
     <!-- ======================================================== -->
+    <!-- MODAL 3: FINALIZAR Y COBRAR (Uso Operativo Diario)       -->
+    <!-- ======================================================== -->
+    <div id="modal-edicion" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h3 style="color: var(--color-principal); margin-top:0;">Cobrar Viaje #<span id="modal-folio-cobro"></span></h3>
+            
+            <input type="hidden" id="modal-id-reserva-cobro">
+            
+            <div style="margin-bottom: 10px;">
+                <label style="font-size: 14px; font-weight: 600;">Origen Real:</label>
+                <input type="text" id="modal-origen-cobro" class="input-modal">
+            </div>
+            
+            <div style="margin-bottom: 10px;">
+                <label style="font-size: 14px; font-weight: 600;">Destino Real:</label>
+                <input type="text" id="modal-destino-cobro" class="input-modal">
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <label style="font-size: 14px; font-weight: 600; color: #00bfff;">Método de Pago:</label>
+                <select id="modal-metodo-cobro" class="input-modal" required>
+                    <option value="" disabled selected>Selecciona el método</option>
+                    <option value="Efectivo MXN">Efectivo MXN</option>
+                    <option value="Efectivo USD">Efectivo USD</option>
+                    <option value="Tarjeta">Tarjeta (Terminal)</option>
+                    <option value="Transferencia">Transferencia</option>
+                </select>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="font-size: 14px; font-weight: 600; color: #28a745;">Precio Final (MXN):</label>
+                <input type="number" id="modal-precio-cobro" class="input-modal" placeholder="0.00" step="0.01" required>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-accion" style="background: #333; color: white;" onclick="cerrarModal('modal-edicion')">Cancelar</button>
+                <button class="btn-accion btn-finalizar" onclick="guardarEdicionYFinalizar()">Cerrar y Cobrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================== -->
     <!-- JAVASCRIPT: FUNCIONES DE INTERCEPTACIÓN ACTUALIZADAS     -->
     <!-- ======================================================== -->
     <script>
+        function cerrarModal(id) { document.getElementById(id).style.display = 'none'; }
+        
+        async function actualizarEstado(id, accion) {
+            try {
+                const res = await fetch(`/admin/iniciar_viaje/${id}`, { method: 'POST' });
+                if (res.ok) window.location.reload(); else alert('Error al iniciar servicio');
+            } catch(e) { alert('Error de red'); }
+        }
+
+        // Lógica de Cobro Estándar
+        function abrirModalEdicion(boton) {
+            const idReserva = boton.getAttribute('data-id');
+            const origen = boton.getAttribute('data-origen');
+            const destino = boton.getAttribute('data-destino');
+            const precioActual = boton.getAttribute('data-precio');
+
+            document.getElementById('modal-id-reserva-cobro').value = idReserva;
+            document.getElementById('modal-folio-cobro').innerText = idReserva;
+            document.getElementById('modal-origen-cobro').value = origen;
+            document.getElementById('modal-destino-cobro').value = destino;
+            document.getElementById('modal-precio-cobro').value = (precioActual && precioActual !== 'None') ? precioActual : '';
+            
+            document.getElementById('modal-edicion').style.display = 'flex';
+        }
+
+        async function guardarEdicionYFinalizar() {
+            const idReserva = document.getElementById('modal-id-reserva-cobro').value;
+            const origen = document.getElementById('modal-origen-cobro').value;
+            const destino = document.getElementById('modal-destino-cobro').value;
+            const metodo = document.getElementById('modal-metodo-cobro').value;
+            const precio = document.getElementById('modal-precio-cobro').value;
+
+            if (!precio || !metodo) return alert('Debes ingresar el Precio y seleccionar un Método de Pago.');
+            
+            try {
+                const res = await fetch(`/admin/viaje/${idReserva}/finalizar_edicion`, {
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ origen: origen, destino: destino, precio: precio, metodo_pago: metodo })
+                });
+                if(res.ok) window.location.reload(); else alert('Error al cerrar viaje.');
+            } catch(e) { alert('Fallo de conexión.'); }
+        }
+
         // Lógica Master Edit (Engrane) Expandida
         function abrirMasterEdit(boton) {
             const id = boton.getAttribute('data-id');
@@ -292,7 +377,7 @@
                 payload.estado_pago = document.getElementById('master-estado-pago').value;
             }
             
-            if(accion === 'cancelar' && !confirm('¿Estás seguro de ocultar (cancelar) este viaje?')) return;
+            if(accion === 'cancelar' && !confirm('¿Estás seguro de cancelar (Ocultar) este viaje?')) return;
 
             try {
                 const res = await fetch(`/admin/viaje/${id}/master_edit`, {
@@ -327,117 +412,6 @@
                 if(res.ok) window.location.reload(); else alert('Error al crear registro manual.');
             } catch(e) { alert('Fallo de conexión.'); }
         }
-    <!-- ======================================================== -->
-    <!-- SCRIPTS CONSOLIDADOS (Sin duplicaciones)                 -->
-    <!-- ======================================================== -->
-    <script>
-        function cerrarModal(id) { document.getElementById(id).style.display = 'none'; }
-        
-        async function actualizarEstado(id, accion) {
-            try {
-                const res = await fetch(`/admin/iniciar_viaje/${id}`, { method: 'POST' });
-                if (res.ok) window.location.reload(); else alert('Error al iniciar servicio');
-            } catch(e) { alert('Error de red'); }
-        }
-
-        // Lógica de Cobro Estándar
-        function abrirModalEdicion(boton) {
-            const idReserva = boton.getAttribute('data-id');
-            const origen = boton.getAttribute('data-origen');
-            const destino = boton.getAttribute('data-destino');
-            const precioActual = boton.getAttribute('data-precio');
-
-            document.getElementById('modal-id-reserva-cobro').value = idReserva;
-            document.getElementById('modal-folio-cobro').innerText = idReserva;
-            document.getElementById('modal-origen-cobro').value = origen;
-            document.getElementById('modal-destino-cobro').value = destino;
-            document.getElementById('modal-precio-cobro').value = (precioActual && precioActual !== 'None') ? precioActual : '';
-            
-            document.getElementById('modal-edicion').style.display = 'flex';
-        }
-
-        async function guardarEdicionYFinalizar() {
-            const idReserva = document.getElementById('modal-id-reserva-cobro').value;
-            const origen = document.getElementById('modal-origen-cobro').value;
-            const destino = document.getElementById('modal-destino-cobro').value;
-            const metodo = document.getElementById('modal-metodo-cobro').value;
-            const precio = document.getElementById('modal-precio-cobro').value;
-
-            if (!precio || !metodo) return alert('Debes ingresar el Precio y seleccionar un Método de Pago.');
-            
-            try {
-                const res = await fetch(`/admin/viaje/${idReserva}/finalizar_edicion`, {
-                    method: 'POST', 
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ origen: origen, destino: destino, precio: precio, metodo_pago: metodo })
-                });
-                if(res.ok) window.location.reload(); else alert('Error al cerrar viaje.');
-            } catch(e) { alert('Fallo de conexión.'); }
-        }
-
-        // Lógica Master Edit (Engrane)
-        function abrirMasterEdit(id, origen, destino, precio, estado) {
-            document.getElementById('master-id').value = id;
-            document.getElementById('master-folio').innerText = id;
-            document.getElementById('master-origen').value = origen;
-            document.getElementById('master-destino').value = destino;
-            document.getElementById('master-precio').value = (precio !== 'None') ? precio : '';
-            
-            const btnReactivar = document.getElementById('btn-reactivar');
-            const btnSave = document.getElementById('btn-save-master');
-            
-            if(estado === 'Cancelado' || estado === 'Finalizado') {
-                btnReactivar.style.display = 'block';
-                btnSave.innerText = 'Actualizar Datos';
-                btnSave.onclick = () => ejecutarMasterAccion('editar');
-            } else {
-                btnReactivar.style.display = 'none';
-                btnSave.innerText = 'Actualizar Datos';
-                btnSave.onclick = () => ejecutarMasterAccion('editar');
-            }
-            document.getElementById('modal-master').style.display = 'flex';
-        }
-
-        async function ejecutarMasterAccion(accion) {
-            const id = document.getElementById('master-id').value;
-            const payload = { accion: accion };
-            
-            if(accion === 'editar') {
-                payload.origen = document.getElementById('master-origen').value;
-                payload.destino = document.getElementById('master-destino').value;
-                payload.precio = document.getElementById('master-precio').value;
-            }
-            
-            if(accion === 'cancelar' && !confirm('¿Estás seguro de cancelar (Ocultar) este viaje?')) return;
-
-            try {
-                const res = await fetch(`/admin/viaje/${id}/master_edit`, {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(payload)
-                });
-                if(res.ok) window.location.reload(); else alert('Error en operación maestra');
-            } catch(e) { alert('Fallo de conexión.'); }
-        }
-
-        // Lógica Registro Manual
-        async function guardarViajeManual() {
-            const p = {
-                pasajeros: document.getElementById('manual-pax').value,
-                origen: document.getElementById('manual-origen').value,
-                destino: document.getElementById('manual-destino').value,
-                fecha_hora: document.getElementById('manual-fecha').value,
-                precio: document.getElementById('manual-precio').value
-            };
-            
-            if(!p.origen || !p.destino || !p.fecha_hora) return alert('Campos obligatorios faltantes.');
-            
-            try {
-                const res = await fetch('/admin/viaje/manual', {
-                    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(p)
-                });
-                if(res.ok) window.location.reload(); else alert('Error al crear registro manual.');
-            } catch(e) { alert('Fallo de conexión.'); }
-        }
 
         // Generador FPDF
         const btnFinalizarDia = document.getElementById('btn-finalizar-dia');
@@ -456,7 +430,8 @@
                     a.click(); window.URL.revokeObjectURL(url);
                     e.target.innerText = 'Día Finalizado Exitosamente';
                 } catch(error) { 
-                    alert(`Fallo en servidor: \n${error.message}`); 
+                    alert(`Fallo en servidor: 
+${error.message}`); 
                     e.target.innerText = 'Reintentar Cierre';
                     e.target.disabled = false;
                 }
