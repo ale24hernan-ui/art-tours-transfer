@@ -32,7 +32,7 @@
 
         .card-body p { margin: 8px 0; font-size: 14px; }
         .card-body i { width: 20px; color: var(--color-principal); }
-        .card-actions { margin-top: 15px; display: flex; gap: 10px; }
+        .card-actions { margin-top: 15px; display: flex; flex-direction: column; gap: 10px; } /* CSS Editado: Botones en Columna para móvil */
         .btn-accion { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: transform 0.1s; }
         .btn-accion:active { transform: scale(0.95); }
         .btn-iniciar { background-color: var(--color-principal); color: #000; }
@@ -102,14 +102,23 @@
                 <div class="card-actions">
                     {% if viaje.estado_reserva == 'Pendiente' %}
                         <button class="btn-accion btn-iniciar" onclick="actualizarEstado({{ viaje.id_reserva }}, 'iniciar')">Iniciar Servicio</button>
+                    
                     {% elif viaje.estado_reserva == 'En_Progreso' %}
-                        <!-- FIX: Inyección limpia de Atributos Data (Dataset API) -->
+                        
+                        <!-- INCIO DE BLOQUE INYECTADO: Botón Manifiesto Turqueza -->
+                        <!-- Aquí empieza tu botón (línea 102 aprox) -->
+                        <a href="/admin/viaje/{{ viaje.id_reserva }}/manifiesto_pdf" target="_blank" class="btn-accion" style="background-color: #6f42c1; color: white; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; margin-bottom: 5px;">
+                            <i class="fas fa-file-pdf" style="margin-right: 5px;"></i> Manifiesto (Hotel)
+                        </a>
+                        <!-- Aquí termina tu botón -->
+                        
                         <button class="btn-accion btn-finalizar" 
                                 data-id="{{ viaje.id_reserva }}" 
                                 data-origen="{{ viaje.origen }}" 
                                 data-destino="{{ viaje.destino }}" 
                                 data-precio="{{ viaje.precio }}" 
                                 onclick="abrirModalEdicion(this)">Finalizar y Cobrar</button>
+                    
                     {% else %}
                         <button class="btn-accion" style="background-color: #333; color: #777; cursor: not-allowed;" disabled>
                             <i class="fas fa-lock"></i> Viaje Cerrado
@@ -202,15 +211,7 @@
             </div>
         </div>
     </div>
-{% elif viaje.estado_reserva == 'En_Progreso' %}
-    <!-- ¿Por qué y para qué?: Agregamos un botón <a> que apunta a la nueva ruta GET.
-         Usamos target="_blank" para que abra o descargue el PDF sin cerrar el panel del chofer. -->
-    <a href="/admin/viaje/{{ viaje.id_reserva }}/ticket_pdf" target="_blank" class="btn-accion" style="background-color: #17a2b8; color: white; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center;">
-        <i class="fas fa-file-pdf" style="margin-right: 5px;"></i> Ver Ticket
-    </a>
-    
-    <!-- FIX: Inyección limpia de Atributos Data (Dataset API) -->
-    <button class="btn-accion btn-finalizar"
+
     <!-- ======================================================== -->
     <!-- MODAL 3: FINALIZAR Y COBRAR (Uso Operativo Diario)       -->
     <!-- ======================================================== -->
