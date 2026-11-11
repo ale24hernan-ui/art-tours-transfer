@@ -87,7 +87,22 @@
                         {% endif %}
                     </div>
                     <!-- Botón Engrane para Master Edit -->
-                    <button class="btn-gear" onclick="abrirMasterEdit({{ viaje.id_reserva }}, '{{ viaje.origen }}', '{{ viaje.destino }}', '{{ viaje.precio }}', '{{ viaje.estado_reserva }}')"><i class="fas fa-cog"></i></button>
+                    <!-- Botón Engrane para Master Edit Expandido -->
+<button class="btn-gear" 
+    data-id="{{ viaje.id_reserva }}"
+    data-origen="{{ viaje.origen }}"
+    data-destino="{{ viaje.destino }}"
+    data-precio="{{ viaje.precio }}"
+    data-hotel="{{ viaje.hotel_referencia }}"
+    data-vuelo="{{ viaje.numero_vuelo }}"
+    data-fecha="{{ viaje.fecha_hora_servicio }}"
+    data-pax="{{ viaje.numero_pasajeros }}"
+    data-estadopago="{{ viaje.estado_pago }}"
+    data-cupon="{{ viaje.cupon }}"
+    data-notas="{{ viaje.notas }}"
+    data-estado="{{ viaje.estado_reserva }}"
+    onclick="abrirMasterEdit(this)"><i class="fas fa-cog"></i>
+</button>
                 </div>
                 
                 <div class="card-body">
@@ -135,19 +150,33 @@
     <button id="btn-finalizar-dia" class="btn-flotante-cierre"><i class="fas fa-file-pdf"></i> Generar Cierre de Hoy</button>
 
     <!-- ======================================================== -->
-    <!-- MODAL 1: EDICIÓN MAESTRA (CRUD TOTAL)                    -->
+    <!-- MODAL 1: EDICIÓN MAESTRA (CRUD TOTAL 360°)               -->
     <!-- ======================================================== -->
     <div id="modal-master" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <h3 style="color: var(--color-principal); margin-top:0;">Folio #<span id="master-folio"></span></h3>
             <input type="hidden" id="master-id">
-            <div style="margin-bottom: 10px;">
-                <label style="font-size: 14px; font-weight: 600;">Origen Real:</label>
-                <input type="text" id="master-origen" class="input-modal">
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div><label style="font-size: 12px; font-weight: 600;">Origen:</label><input type="text" id="master-origen" class="input-modal"></div>
+                <div><label style="font-size: 12px; font-weight: 600;">Destino:</label><input type="text" id="master-destino" class="input-modal"></div>
+                <div><label style="font-size: 12px; font-weight: 600;">Hotel Ref:</label><input type="text" id="master-hotel" class="input-modal"></div>
+                <div><label style="font-size: 12px; font-weight: 600;">Vuelo:</label><input type="text" id="master-vuelo" class="input-modal"></div>
+                <div><label style="font-size: 12px; font-weight: 600;">Fecha y Hora:</label><input type="datetime-local" id="master-fecha" class="input-modal"></div>
+                <div><label style="font-size: 12px; font-weight: 600;">Pax:</label><input type="number" id="master-pax" class="input-modal" min="1"></div>
+                <div><label style="font-size: 12px; font-weight: 600;">Cupón:</label><input type="text" id="master-cupon" class="input-modal"></div>
+                <div>
+                    <label style="font-size: 12px; font-weight: 600;">Estado Pago:</label>
+                    <select id="master-estado-pago" class="input-modal">
+                        <option value="Pago_Pendiente">Pendiente</option>
+                        <option value="Pagado">Pagado</option>
+                    </select>
+                </div>
             </div>
+            
             <div style="margin-bottom: 10px;">
-                <label style="font-size: 14px; font-weight: 600;">Destino Real:</label>
-                <input type="text" id="master-destino" class="input-modal">
+                <label style="font-size: 12px; font-weight: 600;">Notas / Operador:</label>
+                <input type="text" id="master-notas" class="input-modal">
             </div>
             <div style="margin-bottom: 20px;">
                 <label style="color: #28a745; font-size: 14px; font-weight: 600;">Precio (MXN):</label>
@@ -166,45 +195,42 @@
     </div>
 
     <!-- ======================================================== -->
-    <!-- MODAL 2: CREACIÓN MANUAL (Bypass Operativo)              -->
+    <!-- MODAL 2: CREACIÓN MANUAL (Bypass Operativo Expandido)    -->
     <!-- ======================================================== -->
     <div id="modal-crear" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <h3 style="color: var(--color-principal); margin-top:0;">Registro Manual</h3>
-            
             <datalist id="lista-destinos">
                 {% if puntos_interes %}
-                    {% for punto in puntos_interes %}
-                        <option value="{{ punto }}"></option>
-                    {% endfor %}
+                    {% for punto in puntos_interes %}<option value="{{ punto }}"></option>{% endfor %}
                 {% endif %}
             </datalist>
 
-            <div style="margin-bottom: 10px;">
-                <label style="font-size: 14px; font-weight: 600;">Origen:</label>
-                <input type="text" id="manual-origen" class="input-modal" list="lista-destinos" required>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div><label style="font-size: 12px; font-weight: 600;">Origen:</label><input type="text" id="manual-origen" class="input-modal" list="lista-destinos" required></div>
+                <div><label style="font-size: 12px; font-weight: 600;">Destino:</label><input type="text" id="manual-destino" class="input-modal" list="lista-destinos" required></div>
+                <div><label style="font-size: 12px; font-weight: 600;">Hotel Ref:</label><input type="text" id="manual-hotel" class="input-modal"></div>
+                <div><label style="font-size: 12px; font-weight: 600;">Vuelo:</label><input type="text" id="manual-vuelo" class="input-modal"></div>
+                <div><label style="font-size: 12px; font-weight: 600;">Fecha y Hora:</label><input type="datetime-local" id="manual-fecha" class="input-modal" required></div>
+                <div><label style="font-size: 12px; font-weight: 600;">Pax:</label><input type="number" id="manual-pax" class="input-modal" value="1" min="1"></div>
+                <div><label style="font-size: 12px; font-weight: 600;">Cupón:</label><input type="text" id="manual-cupon" class="input-modal"></div>
+                <div>
+                    <label style="font-size: 12px; font-weight: 600;">Estado Pago:</label>
+                    <select id="manual-estado-pago" class="input-modal">
+                        <option value="Pago_Pendiente">Pendiente</option>
+                        <option value="Pagado">Pagado</option>
+                    </select>
+                </div>
             </div>
             
             <div style="margin-bottom: 10px;">
-                <label style="font-size: 14px; font-weight: 600;">Destino:</label>
-                <input type="text" id="manual-destino" class="input-modal" list="lista-destinos" required>
+                <label style="font-size: 12px; font-weight: 600;">Notas / Operador:</label>
+                <input type="text" id="manual-notas" class="input-modal">
             </div>
-
-            <div style="margin-bottom: 10px;">
-                <label style="font-size: 14px; font-weight: 600;">Pasajeros:</label>
-                <input type="number" id="manual-pax" class="input-modal" value="1" min="1" max="40">
-            </div>
-
-            <div style="margin-bottom: 10px;">
-                <label style="font-size: 14px; font-weight: 600;">Fecha y Hora:</label>
-                <input type="datetime-local" id="manual-fecha" class="input-modal" required>
-            </div>
-
             <div style="margin-bottom: 20px;">
                 <label style="font-size: 14px; font-weight: 600; color: #28a745;">Precio (MXN):</label>
-                <input type="number" id="manual-precio" class="input-modal" placeholder="Ej. 1500.00" step="0.01" required>
+                <input type="number" id="manual-precio" class="input-modal" placeholder="0.00" step="0.01" required>
             </div>
-
             <div style="display: flex; gap: 10px;">
                 <button class="btn-accion" style="background: #333; color: white;" onclick="cerrarModal('modal-crear')">Cancelar</button>
                 <button class="btn-accion btn-iniciar" onclick="guardarViajeManual()">Crear Viaje</button>
@@ -213,47 +239,94 @@
     </div>
 
     <!-- ======================================================== -->
-    <!-- MODAL 3: FINALIZAR Y COBRAR (Uso Operativo Diario)       -->
+    <!-- JAVASCRIPT: FUNCIONES DE INTERCEPTACIÓN ACTUALIZADAS     -->
     <!-- ======================================================== -->
-    <div id="modal-edicion" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <h3 style="color: var(--color-principal); margin-top:0;">Cobrar Viaje #<span id="modal-folio-cobro"></span></h3>
+    <script>
+        // Lógica Master Edit (Engrane) Expandida
+        function abrirMasterEdit(boton) {
+            const id = boton.getAttribute('data-id');
+            const estado = boton.getAttribute('data-estado');
+            const rawFecha = boton.getAttribute('data-fecha');
             
-            <input type="hidden" id="modal-id-reserva-cobro">
+            document.getElementById('master-id').value = id;
+            document.getElementById('master-folio').innerText = id;
+            document.getElementById('master-origen').value = boton.getAttribute('data-origen');
+            document.getElementById('master-destino').value = boton.getAttribute('data-destino');
+            document.getElementById('master-hotel').value = (boton.getAttribute('data-hotel') !== 'None') ? boton.getAttribute('data-hotel') : '';
+            document.getElementById('master-vuelo').value = (boton.getAttribute('data-vuelo') !== 'None') ? boton.getAttribute('data-vuelo') : '';
+            document.getElementById('master-pax').value = (boton.getAttribute('data-pax') !== 'None') ? boton.getAttribute('data-pax') : '1';
+            document.getElementById('master-cupon').value = (boton.getAttribute('data-cupon') !== 'None') ? boton.getAttribute('data-cupon') : '';
+            document.getElementById('master-notas').value = (boton.getAttribute('data-notas') !== 'None') ? boton.getAttribute('data-notas') : '';
+            document.getElementById('master-precio').value = (boton.getAttribute('data-precio') !== 'None') ? boton.getAttribute('data-precio') : '';
             
-            <div style="margin-bottom: 10px;">
-                <label style="font-size: 14px; font-weight: 600;">Origen Real:</label>
-                <input type="text" id="modal-origen-cobro" class="input-modal">
-            </div>
+            // ¿Por qué?: Parseo de Timestamp de BD (espacio) a HTML5 datetime-local (letra T).
+            if(rawFecha && rawFecha !== 'None') document.getElementById('master-fecha').value = rawFecha.replace(' ', 'T').substring(0, 16);
+            if(boton.getAttribute('data-estadopago') && boton.getAttribute('data-estadopago') !== 'None') {
+                document.getElementById('master-estado-pago').value = boton.getAttribute('data-estadopago');
+            }
             
-            <div style="margin-bottom: 10px;">
-                <label style="font-size: 14px; font-weight: 600;">Destino Real:</label>
-                <input type="text" id="modal-destino-cobro" class="input-modal">
-            </div>
+            const btnReactivar = document.getElementById('btn-reactivar');
+            const btnSave = document.getElementById('btn-save-master');
+            
+            btnReactivar.style.display = (estado === 'Cancelado' || estado === 'Finalizado') ? 'block' : 'none';
+            btnSave.innerText = 'Actualizar Datos';
+            btnSave.onclick = () => ejecutarMasterAccion('editar');
+            
+            document.getElementById('modal-master').style.display = 'flex';
+        }
 
-            <div style="margin-bottom: 10px;">
-                <label style="font-size: 14px; font-weight: 600; color: #00bfff;">Método de Pago:</label>
-                <select id="modal-metodo-cobro" class="input-modal" required>
-                    <option value="" disabled selected>Selecciona el método</option>
-                    <option value="Efectivo MXN">Efectivo MXN</option>
-                    <option value="Efectivo USD">Efectivo USD</option>
-                    <option value="Tarjeta">Tarjeta (Terminal)</option>
-                    <option value="Transferencia">Transferencia</option>
-                </select>
-            </div>
+        async function ejecutarMasterAccion(accion) {
+            const id = document.getElementById('master-id').value;
+            const payload = { accion: accion };
             
-            <div style="margin-bottom: 20px;">
-                <label style="font-size: 14px; font-weight: 600; color: #28a745;">Precio Final (MXN):</label>
-                <input type="number" id="modal-precio-cobro" class="input-modal" placeholder="0.00" step="0.01" required>
-            </div>
+            if(accion === 'editar') {
+                payload.origen = document.getElementById('master-origen').value;
+                payload.destino = document.getElementById('master-destino').value;
+                payload.hotel_referencia = document.getElementById('master-hotel').value;
+                payload.numero_vuelo = document.getElementById('master-vuelo').value;
+                payload.fecha_hora_servicio = document.getElementById('master-fecha').value.replace('T', ' ');
+                payload.numero_pasajeros = document.getElementById('master-pax').value;
+                payload.cupon = document.getElementById('master-cupon').value;
+                payload.notas = document.getElementById('master-notas').value;
+                payload.precio = document.getElementById('master-precio').value;
+                payload.estado_pago = document.getElementById('master-estado-pago').value;
+            }
             
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-accion" style="background: #333; color: white;" onclick="cerrarModal('modal-edicion')">Cancelar</button>
-                <button class="btn-accion btn-finalizar" onclick="guardarEdicionYFinalizar()">Cerrar y Cobrar</button>
-            </div>
-        </div>
-    </div>
+            if(accion === 'cancelar' && !confirm('¿Estás seguro de ocultar (cancelar) este viaje?')) return;
 
+            try {
+                const res = await fetch(`/admin/viaje/${id}/master_edit`, {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                if(res.ok) window.location.reload(); else alert('Error en operación maestra');
+            } catch(e) { alert('Fallo de conexión.'); }
+        }
+
+        // Lógica Registro Manual Expandida
+        async function guardarViajeManual() {
+            const p = {
+                origen: document.getElementById('manual-origen').value,
+                destino: document.getElementById('manual-destino').value,
+                hotel_referencia: document.getElementById('manual-hotel').value,
+                numero_vuelo: document.getElementById('manual-vuelo').value,
+                pasajeros: document.getElementById('manual-pax').value,
+                fecha_hora: document.getElementById('manual-fecha').value.replace('T', ' '),
+                cupon: document.getElementById('manual-cupon').value,
+                notas: document.getElementById('manual-notas').value,
+                estado_pago: document.getElementById('manual-estado-pago').value,
+                precio: document.getElementById('manual-precio').value
+            };
+            
+            if(!p.origen || !p.destino || !p.fecha_hora) return alert('Campos de Origen, Destino y Fecha son obligatorios.');
+            
+            try {
+                const res = await fetch('/admin/viaje/manual', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(p)
+                });
+                if(res.ok) window.location.reload(); else alert('Error al crear registro manual.');
+            } catch(e) { alert('Fallo de conexión.'); }
+        }
     <!-- ======================================================== -->
     <!-- SCRIPTS CONSOLIDADOS (Sin duplicaciones)                 -->
     <!-- ======================================================== -->
