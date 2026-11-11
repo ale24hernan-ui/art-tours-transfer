@@ -202,7 +202,15 @@
             </div>
         </div>
     </div>
-
+{% elif viaje.estado_reserva == 'En_Progreso' %}
+    <!-- ¿Por qué y para qué?: Agregamos un botón <a> que apunta a la nueva ruta GET.
+         Usamos target="_blank" para que abra o descargue el PDF sin cerrar el panel del chofer. -->
+    <a href="/admin/viaje/{{ viaje.id_reserva }}/ticket_pdf" target="_blank" class="btn-accion" style="background-color: #17a2b8; color: white; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+        <i class="fas fa-file-pdf" style="margin-right: 5px;"></i> Ver Ticket
+    </a>
+    
+    <!-- FIX: Inyección limpia de Atributos Data (Dataset API) -->
+    <button class="btn-accion btn-finalizar"
     <!-- ======================================================== -->
     <!-- MODAL 3: FINALIZAR Y COBRAR (Uso Operativo Diario)       -->
     <!-- ======================================================== -->
